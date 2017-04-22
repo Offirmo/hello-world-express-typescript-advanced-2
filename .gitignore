@@ -7,4 +7,5 @@ yarn-error.log
 node_modules
 
 # secrets
-content/*-unciphered.markdown
+src/routes/sub-app
+dist/src.es7.cjs/routes/sub-app
