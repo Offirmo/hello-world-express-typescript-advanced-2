@@ -4,15 +4,13 @@ import * as ReactDOM from 'react-dom/server'
 const hCardComponent = require('./public/main').default
 
 interface InjectableDependencies {
-   logger: Console
 }
 
 const defaultDependencies: InjectableDependencies = {
-	logger: console,
 }
 
 function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger } = Object.assign({}, defaultDependencies, dependencies)
+	const {  } = Object.assign({}, defaultDependencies, dependencies)
 
 	const hCardProps = {
 		givenName: 'Sam',

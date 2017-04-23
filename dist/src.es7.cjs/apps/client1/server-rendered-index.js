@@ -3,11 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const globals_1 = require("../../globals");
 const ReactDOM = require("react-dom/server");
 const hCardComponent = require('./public/main').default;
-const defaultDependencies = {
-    logger: console,
-};
+const defaultDependencies = {};
 function factory(dependencies = {}) {
-    const { logger } = Object.assign({}, defaultDependencies, dependencies);
+    const {} = Object.assign({}, defaultDependencies, dependencies);
     const hCardProps = {
         givenName: 'Sam',
         surname: 'Fairfax',

@@ -1,5 +1,7 @@
 // unfortunately, we have some globals
-// due to badly written libs
+// due to legacy libs or other constraints
+// Factorize them here to better express the intent
+
 
 import * as React from 'react'
 // Client bundle expects React to be a global
