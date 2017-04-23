@@ -10,7 +10,7 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const {  } = Object.assign({}, defaultDependencies, dependencies)
+	const {} = Object.assign({}, defaultDependencies, dependencies)
 
 	const hCardProps = {
 		givenName: 'Sam',

@@ -18,7 +18,6 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	const preRenderedHtml = renderedHtmlAsStringFactory({ logger })
 
-	//const router = express.Router()
 	const app = express()
 
 	// https://expressjs.com/en/guide/using-template-engines.html

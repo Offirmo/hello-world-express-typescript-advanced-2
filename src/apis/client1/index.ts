@@ -1,83 +1,50 @@
-import * as express from 'express'
+import { Request, Router } from 'express'
 
-import { HCard, defaultHCard } from '../../models/hcard'
+import { CRUD } from '../../persistence/types'
+import { HCard } from '../../models/hcard'
+
+
+interface RequestWithUserId extends Request {
+	userId: string
+}
 
 interface InjectableDependencies {
-	logger: Console
+	logger: Console,
+	hCardCRUD?: CRUD<HCard>
 }
 
 const defaultDependencies: InjectableDependencies = {
 	logger: console,
 }
 
-function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger } = Object.assign({}, defaultDependencies, dependencies)
+
+function factory<ExtendedRequest extends RequestWithUserId>(dependencies: Partial<InjectableDependencies> = {}) {
+	const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies)
 	logger.log('Hello from an API!')
 
-	const router = express.Router()
+	if(!hCardCRUD)
+		throw new Error('hCard API: can’t work without a persistence layer!')
 
-	const ALLOWED_HCARD_KEYS: string[] = Object.keys(defaultHCard)
+	const router = Router()
 
-	function validateKeys(hCardFieldsToUpdate: Partial<HCard>): boolean {
-		const fieldsToUpdate = Object.keys(hCardFieldsToUpdate)
-
-		for (let key of fieldsToUpdate) {
-			if (!ALLOWED_HCARD_KEYS.includes(key)) {
-				logger.error(`unrecognized key "${key}"`)
-				return false
-			}
-		}
-
-		return true
-	}
-
-
-	function updateKeys(hCardFieldsToUpdate: Partial<HCard>, dbHCard: Partial<HCard>) {
-		const fieldsToUpdate = Object.keys(hCardFieldsToUpdate)
-
-		console.log('data so far', dbHCard)
-		console.log('data to update', hCardFieldsToUpdate)
-
-		for (let key of fieldsToUpdate) {
-			if (dbHCard[key] === hCardFieldsToUpdate[key])
-				continue
-
-			// TODO call DB
-			dbHCard[key] = hCardFieldsToUpdate[key]
-		}
-
-		console.log('data now', dbHCard)
-	}
-
-
-	router.post('/update', (req, res) => {
-		let status = 200
-
-		status = 500
-
-		/*const session: SessionData = req.session as SessionData
-		if (!session.hCard) session.hCard = {}
-		logger.log('session IN', session)
-
-		if (!validateKeys(req.body))
-			status = 422
-		else
-			updateKeys(req.body, session.hCard)
-
-		logger.log('session OUT', session)*/
-
-		res.status(status).end()
+	router.post('/update', (req: ExtendedRequest, res, next) => {
+		hCardCRUD.update(req.userId, req.body)
+			.then(() => void res.end())
+			.catch(next)
 	})
 
-	router.post('/submit', (req, res) => {
-		logger.log(req.body)
-		res.send('ok')
+	router.post('/submit', (req: ExtendedRequest, res, next) => {
+		hCardCRUD.update(req.userId, req.body)
+		.then(() => void res.end())
+		.catch(next)
 	})
 
 	return router
 }
 
 export {
+	CRUD,
+	HCard,
 	InjectableDependencies,
 	factory,
 }

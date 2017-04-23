@@ -2,16 +2,20 @@ import * as express from 'express'
 import * as uuid from 'uuid'
 import * as session from 'express-session'
 import { urlencoded as bodyUrlencodedParser} from 'body-parser'
-import { createLogger } from 'bunyan'
 import * as morgan from 'morgan'
+import * as helmet from 'helmet'
 
+import { factory as sessionCRUDFactory } from './persistence/session'
+import { factory as hCardCRUDFactory } from './persistence/hcard'
 import { factory as routesFactory } from './routes'
+import { ExtendedRequest } from './types'
 
 
 interface InjectableDependencies {
 	logger: Console
 	sessionSecret: string
 	isHttps: boolean
+	dbConnexionSettings?: any
 }
 
 
@@ -23,9 +27,12 @@ const defaultDependencies: InjectableDependencies = {
 
 
 function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger, sessionSecret, isHttps } = Object.assign({}, defaultDependencies, dependencies)
+	const { logger, sessionSecret, isHttps, dbConnexionSettings } = Object.assign({}, defaultDependencies, dependencies)
 
-	logger.log('Hello from express app!') // TODO remove
+	logger.info('Hello from express app!') // TODO remove
+
+	if (!dbConnexionSettings)
+		throw new Error('App: Need persistence settings!')
 
 	// TODO HTTPS
 	if (!isHttps)
@@ -34,10 +41,10 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	if (sessionSecret === defaultDependencies.sessionSecret)
 		logger.warn('XXX please set a secret for the session middleware !')
 
-	// TODO make that better
-	const log = createLogger({name: "myapp"})
-	log.info("hi")
-
+	const sessionCRUD = sessionCRUDFactory({
+		logger,
+		dbConnexionSettings,
+	})
 	const app = express()
 
 	// https://expressjs.com/en/4x/api.html#app.settings.table
@@ -48,6 +55,20 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		(req as any).uuid = uuid.v4()
 		next()
 	})
+
+	// log the request as early as possible
+	app.use(morgan('combined')) // TODO remove
+	app.use((req, res, next) => {
+		logger.info({
+			uuid: (req as any).uuid,
+			method: morgan['method'](req),
+			url: morgan['url'](req),
+		})
+		next()
+	})
+
+	// TODO activate CORS
+	app.use(helmet())
 
 	// https://github.com/expressjs/session
 	// TODO store sessions in Redis
@@ -60,17 +81,26 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		}
 	}))
 
-	// log the request
-	app.use(morgan('combined')) // TODO remove
-	app.use((req, res, next) => {
-		log.info({
+	// Use the session to link to a user ID
+	let crudeUserIdGenerator = 0
+	const sessionKey = Symbol('session to user')
+	app.use(async (req: ExtendedRequest, res, next) => {
+		// TODO
+		const sessionId: string = req.session!.id
+		let session = await sessionCRUD.read(sessionId)
+		if (!session) {
+			session = {
+				userId: `${++crudeUserIdGenerator}`
+			}
+			await sessionCRUD.create(sessionId, session)
+		}
+		const { userId } = session
+		req.userId = userId!
+
+		logger.info({
 			uuid: (req as any).uuid,
-			method: morgan['method'](req),
-			url: morgan['url'](req),
-		})
-		log.info({
-			uuid: (req as any).uuid,
-			sessionId: req.session!.id,
+			sessionId,
+			userId,
 		})
 		next()
 	})
@@ -80,7 +110,10 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		limit: '1Mb', // for profile image
 	}))
 
-	app.use(routesFactory({ logger }))
+	app.use(routesFactory({
+		logger,
+		hCardCRUD: hCardCRUDFactory({ logger, dbConnexionSettings })
+	}))
 
 	app.use((req, res) => {
 		logger.error(`! 404 on "${req.path}" !"`)

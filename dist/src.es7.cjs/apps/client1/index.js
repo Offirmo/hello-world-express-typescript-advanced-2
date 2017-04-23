@@ -11,7 +11,6 @@ function factory(dependencies = {}) {
     const { logger } = Object.assign({}, defaultDependencies, dependencies);
     logger.log('Hello from an app!');
     const preRenderedHtml = server_rendered_index_1.factory({ logger });
-    //const router = express.Router()
     const app = express();
     // https://expressjs.com/en/guide/using-template-engines.html
     app.engine('dust', globals_1.consolidatedTemplates.dust); // *.dust templates will be rendered with...
