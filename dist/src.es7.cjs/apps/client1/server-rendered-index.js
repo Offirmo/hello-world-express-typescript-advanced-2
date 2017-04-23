@@ -6,20 +6,13 @@ const hCardComponent = require('./public/main').default;
 const defaultDependencies = {};
 function factory(dependencies = {}) {
     const {} = Object.assign({}, defaultDependencies, dependencies);
-    const hCardProps = {
-        givenName: 'Sam',
-        surname: 'Fairfax',
-        email: 'sam.fairfax@fairfaxmedia.com.au',
-        phone: '0292822833',
-        houseNumber: '100',
-        street: 'Harris Street',
-        suburb: 'Pyrmont',
-        state: 'NSW',
-        postcode: '2009',
-        country: 'Australia'
+    function renderToString(props) {
+        const hCardElement = globals_1.React.createElement(hCardComponent, props);
+        return ReactDOM.renderToString(hCardElement);
+    }
+    return {
+        renderToString
     };
-    const hCardElement = globals_1.React.createElement(hCardComponent, hCardProps);
-    return ReactDOM.renderToString(hCardElement);
 }
 exports.factory = factory;
 //# sourceMappingURL=server-rendered-index.js.map

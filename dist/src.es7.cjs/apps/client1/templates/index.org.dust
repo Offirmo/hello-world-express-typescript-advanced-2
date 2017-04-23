@@ -18,16 +18,16 @@
     <script>
       (function() {
         var hCardProps = {
-          givenName: '{hCardData.givenName|s}',
-          surname: '{hCardData.surname|s}',
-          email: '{hCardData.email|s}',
-          phone: '{hCardData.phone|s}',
-          houseNumber: '{hCardData.houseNumber|s}',
-          street: '{hCardData.street|s}',
-          suburb: '{hCardData.suburb|s}',
-          state: '{hCardData.state|s}',
-          postcode: '{hCardData.postcode|s}',
-          country: '{hCardData.country|s}',
+          givenName: 'Sam',
+          surname: 'Fairfax',
+          email: 'sam.fairfax@fairfaxmedia.com.au',
+          phone: '0292822833',
+          houseNumber: '100',
+          street: 'Harris Street',
+          suburb: 'Pyrmont',
+          state: 'NSW',
+          postcode: '2009',
+          country: 'Australia'
         };
 
         ReactDOM.render(

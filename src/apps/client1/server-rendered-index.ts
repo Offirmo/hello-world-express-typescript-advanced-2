@@ -1,7 +1,10 @@
 import { React } from '../../globals'
 import * as ReactDOM from 'react-dom/server'
 
+import { HCard } from '../../models/hcard'
+
 const hCardComponent = require('./public/main').default
+
 
 interface InjectableDependencies {
 }
@@ -12,22 +15,14 @@ const defaultDependencies: InjectableDependencies = {
 function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const {} = Object.assign({}, defaultDependencies, dependencies)
 
-	const hCardProps = {
-		givenName: 'Sam',
-		surname: 'Fairfax',
-		email: 'sam.fairfax@fairfaxmedia.com.au',
-		phone: '0292822833',
-		houseNumber: '100',
-		street: 'Harris Street',
-		suburb: 'Pyrmont',
-		state: 'NSW',
-		postcode: '2009',
-		country: 'Australia'
+	function renderToString(props: HCard) {
+		const hCardElement = React.createElement(hCardComponent, props)
+		return ReactDOM.renderToString(hCardElement)
 	}
 
-	const hCardElement = React.createElement(hCardComponent, hCardProps)
-
-	return ReactDOM.renderToString(hCardElement)
+	return {
+		renderToString
+	}
 }
 
 export {

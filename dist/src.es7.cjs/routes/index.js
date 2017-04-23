@@ -12,6 +12,7 @@ function factory(dependencies = {}) {
     const router = express.Router();
     router.use('/', client1_1.factory({
         logger,
+        hCardCRUD,
     }));
     router.use('/', client1_2.factory({
         logger,

@@ -55,11 +55,30 @@ function factory(dependencies: Partial<InjectableDependencies> = {}): CRUD<HCard
 	async function read(userId: string): Promise<Partial<HCard>> {
 		validateIdOrThrow(userId)
 
-		return MEMORY_STORE[userId]
+		let res = MEMORY_STORE[userId]
+		if (!res) {
+			// XXX
+			// for the sake of the exercise, let's pretend we have existing data
+			res = {
+				givenName: 'Sam',
+				surname: 'Fairfax',
+				email: 'sam.fairfax@fairfaxmedia.com.au',
+				phone: '0292822833',
+				houseNumber: '100',
+				street: 'Harris Street',
+				suburb: 'Pyrmont',
+				state: 'NSW',
+				postcode: '2009',
+				country: 'Australia'
+			}
+		}
+		if (res) res = Object.assign({}, res)
+
+		return res
 	}
 
 
-	async function update(userId: string, candidateData: Partial<HCard>): Promise<Partial<HCard>> {
+	async function update(userId: string, candidateData: Partial<HCard>): Promise<void> {
 		validateIdOrThrow(userId)
 		validateKeysOrThrow(candidateData)
 
@@ -87,7 +106,6 @@ function factory(dependencies: Partial<InjectableDependencies> = {}): CRUD<HCard
 			MEMORY_STORE[userId] = newData
 
 		console.log('data now', MEMORY_STORE[userId])
-		return newData
 	}
 
 

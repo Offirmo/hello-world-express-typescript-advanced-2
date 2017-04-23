@@ -22,6 +22,7 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	router.use('/', app1Factory({
 		logger,
+		hCardCRUD,
 	}))
 
 	router.use('/', api1Factory({

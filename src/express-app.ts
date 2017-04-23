@@ -88,13 +88,15 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		// TODO
 		const sessionId: string = req.session!.id
 		let session = await sessionCRUD.read(sessionId)
-		if (!session) {
+		if (!session ) {
 			session = {
 				userId: `${++crudeUserIdGenerator}`
 			}
+			console.log('created userId', session.userId)
 			await sessionCRUD.create(sessionId, session)
 		}
 		const { userId } = session
+		console.log({userId})
 		req.userId = userId!
 
 		logger.info({

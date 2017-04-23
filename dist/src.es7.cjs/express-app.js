@@ -69,9 +69,11 @@ function factory(dependencies = {}) {
             session = {
                 userId: `${++crudeUserIdGenerator}`
             };
+            console.log('created userId', session.userId);
             await sessionCRUD.create(sessionId, session);
         }
         const { userId } = session;
+        console.log({ userId });
         req.userId = userId;
         logger.info({
             uuid: req.uuid,

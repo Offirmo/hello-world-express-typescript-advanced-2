@@ -1,11 +1,20 @@
 import * as path from 'path'
 import * as express from 'express'
 
+import { CRUD } from '../../persistence/types'
+import { HCard, defaultHCard } from '../../models/hcard'
+
 import { consolidatedTemplates } from '../../globals'
 import { factory as renderedHtmlAsStringFactory } from './server-rendered-index'
 
+
+interface RequestWithUserId extends Request {
+	userId: string
+}
+
 interface InjectableDependencies {
 	logger: Console
+	hCardCRUD?: CRUD<HCard>
 }
 
 const defaultDependencies: InjectableDependencies = {
@@ -13,10 +22,13 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger } = Object.assign({}, defaultDependencies, dependencies)
+	const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies)
 	logger.log('Hello from an app!')
 
-	const preRenderedHtml = renderedHtmlAsStringFactory({ logger })
+	if(!hCardCRUD)
+		logger.warn('Client1 app: I won’t be able to prefill data without persistence connexion infos for hCard.')
+
+	const renderedHtmlAsString = renderedHtmlAsStringFactory({ logger }).renderToString
 
 	const app = express()
 
@@ -29,8 +41,26 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	// REM: respond with index.html when a GET request is made to the homepage
 	app.use(express.static(path.join(__dirname, 'public')))
 
-	// TODO populate initial datas !
-	app.get('/', (req, res) => void res.render('index', { preRenderedHtml }))
+	async function handleAsync(req: RequestWithUserId, res) {
+		let hCardData: Partial<HCard> = {}
+		if (hCardCRUD) {
+			hCardData = await hCardCRUD.read(req.userId) || {}
+		}
+
+		const fullHCardData: HCard = Object.assign({}, defaultHCard, hCardData)
+
+		const preRenderedHtml = renderedHtmlAsString(fullHCardData)
+		console.log('restoring...', hCardData, fullHCardData, preRenderedHtml)
+
+		res.render('index', {
+			preRenderedHtml,
+			hCardData: fullHCardData,
+		})
+	}
+
+	app.get('/', (req, res, next) => {
+		handleAsync(req as any as RequestWithUserId, res).catch(next)
+	})
 
 	return app
 }

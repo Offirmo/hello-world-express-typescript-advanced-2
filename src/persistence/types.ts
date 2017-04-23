@@ -1,8 +1,8 @@
 
 interface CRUD<T> {
-	create: (recordId?: string, data?: Partial<T>) => Promise<string>
+	create: (candidateRecordId?: string, candidateData?: Partial<T>) => Promise<string>
 	read: (recordId: string) => Promise<Partial<T> | undefined>
-	update: (recordId: string, data: Partial<T>) => Promise<Partial<T>>
+	update: (recordId: string, candidateData: Partial<T>) => Promise<void>
 	purge: (recordId: string) => Promise<void>
 }
 

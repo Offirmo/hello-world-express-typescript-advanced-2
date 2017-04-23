@@ -31,7 +31,10 @@ function factory(dependencies = {}) {
     }
     async function read(sessionId) {
         validateIdOrThrow(sessionId);
-        return MEMORY_STORE[sessionId];
+        let res = MEMORY_STORE[sessionId];
+        if (res)
+            res = Object.assign({}, res);
+        return res;
     }
     async function update(userId, candidateData) {
         validateIdOrThrow(userId);

@@ -35,7 +35,26 @@ function factory(dependencies = {}) {
     }
     async function read(userId) {
         validateIdOrThrow(userId);
-        return MEMORY_STORE[userId];
+        let res = MEMORY_STORE[userId];
+        if (!res) {
+            // XXX
+            // for the sake of the exercise, let's pretend we have existing data
+            res = {
+                givenName: 'Sam',
+                surname: 'Fairfax',
+                email: 'sam.fairfax@fairfaxmedia.com.au',
+                phone: '0292822833',
+                houseNumber: '100',
+                street: 'Harris Street',
+                suburb: 'Pyrmont',
+                state: 'NSW',
+                postcode: '2009',
+                country: 'Australia'
+            };
+        }
+        if (res)
+            res = Object.assign({}, res);
+        return res;
     }
     async function update(userId, candidateData) {
         validateIdOrThrow(userId);
@@ -59,7 +78,6 @@ function factory(dependencies = {}) {
         if (needUpdate)
             MEMORY_STORE[userId] = newData;
         console.log('data now', MEMORY_STORE[userId]);
-        return newData;
     }
     async function purge(userId) {
         validateIdOrThrow(userId);

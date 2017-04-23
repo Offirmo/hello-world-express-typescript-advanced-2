@@ -9,7 +9,7 @@ interface RequestWithUserId extends Request {
 }
 
 interface InjectableDependencies {
-	logger: Console,
+	logger: Console
 	hCardCRUD?: CRUD<HCard>
 }
 
@@ -18,7 +18,7 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 
-function factory<ExtendedRequest extends RequestWithUserId>(dependencies: Partial<InjectableDependencies> = {}) {
+function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies)
 	logger.log('Hello from an API!')
 
@@ -27,13 +27,13 @@ function factory<ExtendedRequest extends RequestWithUserId>(dependencies: Partia
 
 	const router = Router()
 
-	router.post('/update', (req: ExtendedRequest, res, next) => {
+	router.post('/update', (req: RequestWithUserId, res, next) => {
 		hCardCRUD.update(req.userId, req.body)
 			.then(() => void res.end())
 			.catch(next)
 	})
 
-	router.post('/submit', (req: ExtendedRequest, res, next) => {
+	router.post('/submit', (req: RequestWithUserId, res, next) => {
 		hCardCRUD.update(req.userId, req.body)
 		.then(() => void res.end())
 		.catch(next)

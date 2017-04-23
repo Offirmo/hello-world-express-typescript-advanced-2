@@ -54,11 +54,14 @@ function factory(dependencies: Partial<InjectableDependencies> = {}): CRUD<Sessi
 	async function read(sessionId: string): Promise<Partial<Session>> {
 		validateIdOrThrow(sessionId)
 
-		return MEMORY_STORE[sessionId]
+		let res = MEMORY_STORE[sessionId]
+		if (res) res = Object.assign({}, res)
+
+		return res
 	}
 
 
-	async function update(userId: string, candidateData: Partial<Session>): Promise<Partial<Session>> {
+	async function update(userId: string, candidateData: Partial<Session>): Promise<void> {
 		validateIdOrThrow(userId)
 
 		const err = new Error('Session CRUD: not implemented!') as ExtendedError
