@@ -1,6 +1,6 @@
+"use strict";
 // unfortunately, we have some globals
 // due to badly written libs
-"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 exports.React = React;
