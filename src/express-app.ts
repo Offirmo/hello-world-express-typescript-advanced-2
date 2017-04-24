@@ -124,7 +124,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	const errorHandler: express.ErrorRequestHandler = (err, req, res, next) => {
 		logger.error(err.stack)
-		res.status(500).send('Something broke !')
+		res.status(500).send(`Something broke ! ${err.message}`)
 	}
 	app.use(errorHandler)
 

@@ -92,7 +92,7 @@ async function factory(dependencies = {}) {
     });
     const errorHandler = (err, req, res, next) => {
         logger.error(err.stack);
-        res.status(500).send('Something broke !');
+        res.status(500).send(`Something broke ! ${err.message}`);
     };
     app.use(errorHandler);
     return app;
