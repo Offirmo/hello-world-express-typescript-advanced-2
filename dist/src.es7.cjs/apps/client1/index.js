@@ -12,7 +12,7 @@ function factory(dependencies = {}) {
     const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies);
     logger.log('Hello from an app!');
     if (!hCardCRUD)
-        logger.warn('Client1 app: I won’t be able to prefill data without persistence connexion infos for hCard.');
+        throw new Error('Client1 app: can’t work without a persistence layer!');
     const renderedHtmlAsString = server_rendered_index_1.factory({ logger }).renderToString;
     const app = express();
     // https://expressjs.com/en/guide/using-template-engines.html
@@ -23,10 +23,7 @@ function factory(dependencies = {}) {
     // REM: respond with index.html when a GET request is made to the homepage
     app.use(express.static(path.join(__dirname, 'public')));
     async function handleAsync(req, res) {
-        let hCardData = {};
-        if (hCardCRUD) {
-            hCardData = await hCardCRUD.read(req.userId) || {};
-        }
+        let hCardData = await hCardCRUD.read(req.userId) || {};
         const fullHCardData = Object.assign({}, hcard_1.defaultHCard, hCardData);
         const preRenderedHtml = renderedHtmlAsString(fullHCardData);
         console.log('restoring...', hCardData, fullHCardData, preRenderedHtml);
@@ -36,7 +33,18 @@ function factory(dependencies = {}) {
         });
     }
     app.get('/', (req, res, next) => {
-        handleAsync(req, res).catch(next);
+        handleAsync(req, res)
+            .catch(next);
+    });
+    app.post('/update', (req, res, next) => {
+        hCardCRUD.update(req.userId, req.body)
+            .then(() => void res.end())
+            .catch(next);
+    });
+    app.post('/submit', (req, res, next) => {
+        hCardCRUD.update(req.userId, req.body)
+            .then(() => void res.end())
+            .catch(next);
     });
     return app;
 }

@@ -8,7 +8,7 @@ import { consolidatedTemplates } from '../../globals'
 import { factory as renderedHtmlAsStringFactory } from './server-rendered-index'
 
 
-interface RequestWithUserId extends Request {
+interface RequestWithUserId extends express.Request {
 	userId: string
 }
 
@@ -26,7 +26,7 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	logger.log('Hello from an app!')
 
 	if(!hCardCRUD)
-		logger.warn('Client1 app: I won’t be able to prefill data without persistence connexion infos for hCard.')
+		throw new Error('Client1 app: can’t work without a persistence layer!')
 
 	const renderedHtmlAsString = renderedHtmlAsStringFactory({ logger }).renderToString
 
@@ -42,11 +42,7 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	app.use(express.static(path.join(__dirname, 'public')))
 
 	async function handleAsync(req: RequestWithUserId, res) {
-		let hCardData: Partial<HCard> = {}
-		if (hCardCRUD) {
-			hCardData = await hCardCRUD.read(req.userId) || {}
-		}
-
+		let hCardData: Partial<HCard> = await hCardCRUD!.read(req.userId) || {}
 		const fullHCardData: HCard = Object.assign({}, defaultHCard, hCardData)
 
 		const preRenderedHtml = renderedHtmlAsString(fullHCardData)
@@ -58,14 +54,28 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		})
 	}
 
-	app.get('/', (req, res, next) => {
-		handleAsync(req as any as RequestWithUserId, res).catch(next)
+	app.get('/', (req: RequestWithUserId, res, next) => {
+		handleAsync(req, res)
+			.catch(next)
+	})
+
+	app.post('/update', (req: RequestWithUserId, res, next) => {
+		hCardCRUD.update(req.userId, req.body)
+			.then(() => void res.end())
+			.catch(next)
+	})
+
+	app.post('/submit', (req: RequestWithUserId, res, next) => {
+		hCardCRUD.update(req.userId, req.body)
+			.then(() => void res.end())
+			.catch(next)
 	})
 
 	return app
 }
 
 export {
+	HCard,
 	InjectableDependencies,
 	factory,
 }

@@ -1,8 +1,7 @@
 import * as express from 'express'
 
 import { CRUD } from '../persistence/types'
-import { factory as app1Factory } from '../apps/client1'
-import { HCard, factory as api1Factory } from '../apis/client1'
+import { HCard, factory as app1Factory } from '../apps/client1'
 
 
 interface InjectableDependencies {
@@ -21,11 +20,6 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const router = express.Router()
 
 	router.use('/', app1Factory({
-		logger,
-		hCardCRUD,
-	}))
-
-	router.use('/', api1Factory({
 		logger,
 		hCardCRUD,
 	}))

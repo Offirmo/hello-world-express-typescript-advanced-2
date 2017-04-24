@@ -18,16 +18,16 @@
     <script>
       (function() {
         var hCardProps = {
-          givenName: '{hCardData.givenName|s}',
-          surname: '{hCardData.surname|s}',
-          email: '{hCardData.email|s}',
-          phone: '{hCardData.phone|s}',
-          houseNumber: '{hCardData.houseNumber|s}',
-          street: '{hCardData.street|s}',
-          suburb: '{hCardData.suburb|s}',
-          state: '{hCardData.state|s}',
-          postcode: '{hCardData.postcode|s}',
-          country: '{hCardData.country|s}',
+          givenName: '{hCardData.givenName|j}',
+          surname: '{hCardData.surname|j}',
+          email: '{hCardData.email|j}',
+          phone: '{hCardData.phone|j}',
+          houseNumber: '{hCardData.houseNumber|j}',
+          street: '{hCardData.street|j}',
+          suburb: '{hCardData.suburb|j}',
+          state: '{hCardData.state|j}',
+          postcode: '{hCardData.postcode|j}',
+          country: '{hCardData.country|j}',
         };
 
         ReactDOM.render(
