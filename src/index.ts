@@ -2,7 +2,6 @@ import { createServer } from 'http'
 import { createLogger } from 'bunyan'
 import { ServerLogger } from '@offirmo/loggers-types-and-stubs'
 import { MongoClient } from 'mongodb'
-import * as simplyconfig from 'simplyconfig'
 
 import { factory as expressAppFactory } from './express-app'
 
@@ -57,7 +56,7 @@ async function factory() {
 	const server = createServer(await expressAppFactory({
 		logger,
 		sessionSecret: config.sessionSecret,
-		dbHCard: dbMongo01,
+		dbUsers: dbMongo01,
 		dbSessionRedisUrl: config.dbUrlRedis01,
 	}))
 

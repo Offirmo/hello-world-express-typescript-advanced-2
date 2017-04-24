@@ -7,7 +7,7 @@ const defaultDependencies = {
 };
 async function factory(dependencies = {}) {
     const { logger } = Object.assign({}, defaultDependencies, dependencies);
-    logger.debug('Initializing the base webapp…');
+    logger.debug('Initializing the splash webapp…');
     const app = express.Router();
     app.get('/', (req, res) => {
         res.send('This is not what you are looking for. Maybe you should check the instructions ?');

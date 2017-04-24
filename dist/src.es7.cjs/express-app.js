@@ -8,7 +8,7 @@ const body_parser_1 = require("body-parser");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
-const hcard_1 = require("./persistence/hcard");
+const user_1 = require("./persistence/user");
 const routes_1 = require("./routes");
 const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
@@ -16,11 +16,11 @@ const defaultDependencies = {
     isHttps: false,
 };
 async function factory(dependencies = {}) {
-    const { logger, sessionSecret, isHttps, dbHCard, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies);
+    const { logger, sessionSecret, isHttps, dbUsers, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies);
     logger.info('Initializing the top express app…');
     const RedisSessionStore = redisSession(session);
-    if (!dbHCard)
-        throw new Error('App: Need persistence link for hCards!');
+    if (!dbUsers)
+        throw new Error('App: Need persistence db for users !');
     if (!dbSessionRedisUrl)
         logger.warn('XXX please provide a redis url for the session store !');
     // TODO HTTPS
@@ -31,7 +31,7 @@ async function factory(dependencies = {}) {
     const app = express();
     // https://expressjs.com/en/4x/api.html#app.settings.table
     app.enable('trust proxy');
-    app.disable('x-powered-by'); // safety
+    app.disable('x-powered-by');
     app.use(function assignId(req, res, next) {
         req.uuid = uuid.v4();
         next();
@@ -46,6 +46,7 @@ async function factory(dependencies = {}) {
         });
         next();
     });
+    // TODO log on exit also !
     // TODO activate CORS
     app.use(helmet());
     // https://github.com/expressjs/session
@@ -67,7 +68,7 @@ async function factory(dependencies = {}) {
             // This is an exercise
             // We are supposing the user is previously connected
             // Thus we are always using the same user:
-            req.session.userId = 1234;
+            req.session.userId = '1234';
         }
         req.userId = req.session.userId;
         logger.info({
@@ -84,7 +85,7 @@ async function factory(dependencies = {}) {
     }));
     app.use(await routes_1.factory({
         logger,
-        hCardCRUD: await hcard_1.factory({ logger, db: dbHCard })
+        userCRUD: await user_1.factory({ logger, db: dbUsers })
     }));
     app.use((req, res) => {
         logger.error(`! 404 on "${req.path}" !"`);

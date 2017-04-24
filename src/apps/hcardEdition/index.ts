@@ -3,6 +3,7 @@ import * as express from 'express'
 import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-stubs'
 
 import { CRUD } from '../../persistence/types'
+import { User } from '../../models/user'
 import { HCard, defaultHCard } from '../../models/hcard'
 import { RequestWithUserId } from "../../types";
 
@@ -12,7 +13,7 @@ import { factory as renderedHtmlAsStringFactory } from './server-rendered-index'
 
 interface InjectableDependencies {
 	logger: ServerLogger
-	hCardCRUD?: CRUD<HCard>
+	userCRUD?: CRUD<User>
 }
 
 const defaultDependencies: InjectableDependencies = {
@@ -20,11 +21,11 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 async function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies)
+	const { logger, userCRUD } = Object.assign({}, defaultDependencies, dependencies)
 	logger.debug('Initializing the client1 webapp…')
 
-	if(!hCardCRUD)
-		throw new Error('Client1 app: can’t work without a persistence layer!')
+	if(!userCRUD)
+		throw new Error('hCard edition app: can’t work without a persistence layer!')
 
 	const renderedHtmlAsString = (await renderedHtmlAsStringFactory({ logger })).renderToString
 
@@ -40,15 +41,19 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	app.use(express.static(path.join(__dirname, 'public')))
 
 	async function handleAsync(req: RequestWithUserId, res) {
-		let hCardData: Partial<HCard> = await hCardCRUD!.read(req.userId) || {}
-		const fullHCardData: HCard = Object.assign({}, defaultHCard, hCardData)
+		let userData = await userCRUD!.read(req.userId)
+		console.log('restoring...', userData)
+		//console.log('restoring...', userData, userData!.hCard, userData!.pendingHCardUpdates)
 
-		const preRenderedHtml = renderedHtmlAsString(fullHCardData)
+		// TODO restore from live edit !
+		let editorHCardData: HCard = Object.assign({}, userData!.hCard) as HCard
+
+		const preRenderedHtml = renderedHtmlAsString(editorHCardData)
 		//console.log('restoring...', hCardData, fullHCardData, preRenderedHtml)
 
 		res.render('index', {
 			preRenderedHtml,
-			hCardData: fullHCardData,
+			hCardData: editorHCardData,
 		})
 	}
 
@@ -61,7 +66,6 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 }
 
 export {
-	HCard,
 	InjectableDependencies,
 	factory,
 }

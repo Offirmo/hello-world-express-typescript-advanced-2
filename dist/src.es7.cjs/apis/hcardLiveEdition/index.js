@@ -6,18 +6,18 @@ const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
 };
 async function factory(dependencies = {}) {
-    const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies);
+    const { logger, userCRUD } = Object.assign({}, defaultDependencies, dependencies);
     logger.debug('Initializing the client1 API…');
-    if (!hCardCRUD)
-        throw new Error('hCard API: can’t work without a persistence layer!');
+    if (!userCRUD)
+        throw new Error('hCard live edition API: can’t work without a persistence layer!');
     const router = express_1.Router();
     router.post('/update', (req, res, next) => {
-        hCardCRUD.update(req.userId, req.body)
+        userCRUD.update(req.userId, { pendingHCardUpdates: req.body })
             .then(() => void res.end())
             .catch(next);
     });
     router.post('/submit', (req, res, next) => {
-        hCardCRUD.update(req.userId, req.body)
+        userCRUD.update(req.userId, { pendingHCardUpdates: req.body })
             .then(() => void res.end())
             .catch(next);
     });

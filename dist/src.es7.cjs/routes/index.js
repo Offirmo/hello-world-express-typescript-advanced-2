@@ -2,26 +2,26 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
-const base_1 = require("../apps/base");
-const client1_1 = require("../apis/client1");
-const client1_2 = require("../apps/client1");
+const splash_1 = require("../apps/splash");
+const hcardLiveEdition_1 = require("../apis/hcardLiveEdition");
+const hcardEdition_1 = require("../apps/hcardEdition");
 const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
 };
 async function factory(dependencies = {}) {
-    const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies);
+    const { logger, userCRUD } = Object.assign({}, defaultDependencies, dependencies);
     logger.debug('Hello from main route!');
     const router = express.Router();
-    router.use('/', await base_1.factory({
+    router.use('/', await splash_1.factory({
         logger,
     }));
-    router.use('/', await client1_1.factory({
+    router.use('/', await hcardLiveEdition_1.factory({
         logger,
-        hCardCRUD,
+        userCRUD,
     }));
-    router.use('/domain', await client1_2.factory({
+    router.use('/domain', await hcardEdition_1.factory({
         logger,
-        hCardCRUD,
+        userCRUD,
     }));
     return router;
 }

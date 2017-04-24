@@ -12,7 +12,7 @@ const defaultDependencies: InjectableDependencies = {
 
 async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const { logger } = Object.assign({}, defaultDependencies, dependencies)
-	logger.debug('Initializing the base webapp…')
+	logger.debug('Initializing the splash webapp…')
 
 	const app = express.Router()
 

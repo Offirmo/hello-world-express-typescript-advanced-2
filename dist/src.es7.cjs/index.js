@@ -42,7 +42,7 @@ async function factory() {
     const server = http_1.createServer(await express_app_1.factory({
         logger,
         sessionSecret: config.sessionSecret,
-        dbHCard: dbMongo01,
+        dbUsers: dbMongo01,
         dbSessionRedisUrl: config.dbUrlRedis01,
     }));
     server.listen(config.port, (err) => {

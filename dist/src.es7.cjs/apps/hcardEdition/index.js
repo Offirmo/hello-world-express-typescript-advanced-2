@@ -3,17 +3,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const express = require("express");
 const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
-const hcard_1 = require("../../models/hcard");
 const globals_1 = require("../../globals");
 const server_rendered_index_1 = require("./server-rendered-index");
 const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
 };
 async function factory(dependencies = {}) {
-    const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies);
+    const { logger, userCRUD } = Object.assign({}, defaultDependencies, dependencies);
     logger.debug('Initializing the client1 webapp…');
-    if (!hCardCRUD)
-        throw new Error('Client1 app: can’t work without a persistence layer!');
+    if (!userCRUD)
+        throw new Error('hCard edition app: can’t work without a persistence layer!');
     const renderedHtmlAsString = (await server_rendered_index_1.factory({ logger })).renderToString;
     const app = express();
     // https://expressjs.com/en/guide/using-template-engines.html
@@ -24,13 +23,16 @@ async function factory(dependencies = {}) {
     // REM: respond with index.html when a GET request is made to the homepage
     app.use(express.static(path.join(__dirname, 'public')));
     async function handleAsync(req, res) {
-        let hCardData = await hCardCRUD.read(req.userId) || {};
-        const fullHCardData = Object.assign({}, hcard_1.defaultHCard, hCardData);
-        const preRenderedHtml = renderedHtmlAsString(fullHCardData);
+        let userData = await userCRUD.read(req.userId);
+        console.log('restoring...', userData);
+        //console.log('restoring...', userData, userData!.hCard, userData!.pendingHCardUpdates)
+        // TODO restore from live edit !
+        let editorHCardData = Object.assign({}, userData.hCard);
+        const preRenderedHtml = renderedHtmlAsString(editorHCardData);
         //console.log('restoring...', hCardData, fullHCardData, preRenderedHtml)
         res.render('index', {
             preRenderedHtml,
-            hCardData: fullHCardData,
+            hCardData: editorHCardData,
         });
     }
     app.get('/', (req, res, next) => {

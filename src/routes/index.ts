@@ -2,14 +2,15 @@ import * as express from 'express'
 import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-stubs'
 
 import { CRUD } from '../persistence/types'
-import { factory as baseAppFactory } from '../apps/base'
-import { factory as client1APIFactory } from '../apis/client1'
-import { HCard, factory as client1AppFactory } from '../apps/client1'
+import { User } from '../models/user'
+import { factory as splashAppFactory } from '../apps/splash'
+import { factory as hcardLiveEditionAPIFactory } from '../apis/hcardLiveEdition'
+import { factory as hcardEditionAppFactory } from '../apps/hcardEdition'
 
 
 interface InjectableDependencies {
 	logger: ServerLogger
-	hCardCRUD?: CRUD<HCard>
+	userCRUD?: CRUD<User>
 }
 
 const defaultDependencies: InjectableDependencies = {
@@ -17,23 +18,23 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 async function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies)
+	const { logger, userCRUD } = Object.assign({}, defaultDependencies, dependencies)
 	logger.debug('Hello from main route!')
 
 	const router = express.Router()
 
-	router.use('/', await baseAppFactory({
+	router.use('/', await splashAppFactory({
 		logger,
 	}))
 
-	router.use('/', await client1APIFactory({
+	router.use('/', await hcardLiveEditionAPIFactory({
 		logger,
-		hCardCRUD,
+		userCRUD,
 	}))
 
-	router.use('/domain', await client1AppFactory({
+	router.use('/domain', await hcardEditionAppFactory({
 		logger,
-		hCardCRUD,
+		userCRUD,
 	}))
 
 	return router

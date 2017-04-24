@@ -8,7 +8,7 @@ import * as helmet from 'helmet'
 import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-stubs'
 import { Db as MongoDb } from 'mongodb'
 
-import { factory as hCardCRUDFactory } from './persistence/hcard'
+import { factory as userCRUDFactory } from './persistence/user'
 import { factory as routesFactory } from './routes'
 import { RequestWithUUID, ExtendedRequest } from "./types"
 
@@ -17,10 +17,9 @@ interface InjectableDependencies {
 	logger: ServerLogger
 	sessionSecret: string
 	isHttps: boolean
-	dbHCard?: MongoDb
+	dbUsers?: MongoDb
 	dbSessionRedisUrl?: string
 }
-
 
 const defaultDependencies: InjectableDependencies = {
 	logger: serverLoggerToConsole,
@@ -29,13 +28,13 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 async function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger, sessionSecret, isHttps, dbHCard, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies)
+	const { logger, sessionSecret, isHttps, dbUsers, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies)
 	logger.info('Initializing the top express app…')
 
 	const RedisSessionStore = redisSession(session)
 
-	if (!dbHCard)
-		throw new Error('App: Need persistence link for hCards!')
+	if (!dbUsers)
+		throw new Error('App: Need persistence db for users !')
 
 	if (!dbSessionRedisUrl)
 		logger.warn('XXX please provide a redis url for the session store !')
@@ -51,7 +50,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	// https://expressjs.com/en/4x/api.html#app.settings.table
 	app.enable('trust proxy')
-	app.disable('x-powered-by') // safety
+	app.disable('x-powered-by')
 
 	app.use(function assignId(req: RequestWithUUID, res, next) {
 		req.uuid = uuid.v4()
@@ -68,6 +67,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		})
 		next()
 	})
+	// TODO log on exit also !
 
 	// TODO activate CORS
 	app.use(helmet())
@@ -92,7 +92,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			// This is an exercise
 			// We are supposing the user is previously connected
 			// Thus we are always using the same user:
-			req.session!.userId = 1234
+			req.session!.userId = '1234'
 		}
 
 		req.userId = req.session!.userId
@@ -115,7 +115,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	app.use(await routesFactory({
 		logger,
-		hCardCRUD: await hCardCRUDFactory({ logger, db: dbHCard })
+		userCRUD: await userCRUDFactory({ logger, db: dbUsers })
 	}))
 
 	app.use((req, res) => {
