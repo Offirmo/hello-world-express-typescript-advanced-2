@@ -12,14 +12,17 @@
   "scripts": {
     "__prod": "~~~~~~ PRODUCTION ~~~~~~",
     "clean": "rm -rf dist",
-    "prebuild": "npm run clean",
-    "build": "tsc --project meta/prod",
+    "transpile": "tsc --project meta/prod",
+    "copy-other-files": "cpx 'src/**/*.{dust,css,png}' dist/src.es7.cjs",
+    "build": "npm-run-all clean --parallel transpile copy-other-files",
     "start": "node dist/src.es7.cjs/index.js",
+
     "__dev": "~~~~~~ DEVELOPMENT ~~~~~~",
     "dev1": "tsc -p meta/dev --watch",
-    "dev2": "cpx 'src/**/*.{dust,css,png}' dist/src.es7.cjs --watch --verbose",
+    "dev2": "npm run copy-other-files -- --watch --verbose",
     "dev": "npm-run-all clean --parallel dev1 dev2",
     "start:dev": "nodemon --delay 1 --config meta/dev/nodemon.json dist/src.es7.cjs/index.js | ./node_modules/.bin/bunyan",
+    
     "__misc": "~~~~~~ MISC ~~~~~~",
     "__local_tools": "~~~~~~ Tools installed locally ~~~~~~",
     "__shortcuts": "~~~~~~ Shortcuts ~~~~~~"
