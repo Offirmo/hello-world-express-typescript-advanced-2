@@ -47,47 +47,27 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}): Prom
 
 	async function read(userId: string): Promise<User | undefined> {
 		validateUserIdOrThrow(userId)
-		console.log('reading...', userId, typeof userId)
-
 		return await userCollection.findOne({ id: userId })
-			.then(u => {
-				console.log(u)
-				return u
-			})
 	}
 
 
 	async function update(userId: string, candidateData: Partial<User>): Promise<void> {
 		validateUserIdOrThrow(userId)
 		validateHCardKeysOrThrow(candidateData.hCard || {})
+		validateHCardKeysOrThrow(candidateData.pendingHCardUpdates || {})
 
-		throw new Error('Not implemented!')
-
-		/*
-		let needUpdate = false
 		let existingData = await read(userId)
 		if (!existingData) {
-			existingData = {}
-			needUpdate = true
+			const err = new Error(`User not found`) as ExtendedError
+			err.httpStatusHint = 404
+			err.details = { userId }
+			throw err
 		}
-		const fieldsToUpdate = Object.keys(candidateData)
-		const newData = existingData
-
+		
 		console.log('data so far', existingData)
-		console.log('data to update', candidateData)
+		console.log('data pending', defaultsDeep(candidateData, existingData))
 
-		for (let key of fieldsToUpdate) {
-			if (existingData[key] === candidateData[key])
-				continue
-
-			needUpdate = true
-			newData[key] = candidateData[key]
-		}
-
-		if (needUpdate)
-			MEMORY_STORE[userId] = newData
-
-		console.log('data now', MEMORY_STORE[userId])*/
+		await userCollection.updateOne({ id: userId }, candidateData)
 	}
 
 
@@ -117,8 +97,6 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}): Prom
 			}
 		})
 	}
-	await read('1234')
-	await read('1234')
 
 
 	return {

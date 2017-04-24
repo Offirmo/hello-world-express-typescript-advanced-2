@@ -42,14 +42,12 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	async function handleAsync(req: RequestWithUserId, res) {
 		let userData = await userCRUD!.read(req.userId)
-		console.log('restoring...', userData)
-		//console.log('restoring...', userData, userData!.hCard, userData!.pendingHCardUpdates)
 
-		// TODO restore from live edit !
-		let editorHCardData: HCard = Object.assign({}, userData!.hCard) as HCard
+		console.log('restoring...', userData, userData!.hCard, userData!.pendingHCardUpdates)
+		let editorHCardData: HCard = Object.assign({}, userData!.hCard, userData!.pendingHCardUpdates) as HCard
 
 		const preRenderedHtml = renderedHtmlAsString(editorHCardData)
-		//console.log('restoring...', hCardData, fullHCardData, preRenderedHtml)
+		//console.log('restoring...', editorHCardData, preRenderedHtml)
 
 		res.render('index', {
 			preRenderedHtml,

@@ -3,6 +3,7 @@ import * as Express from 'express'
 
 interface ExtendedError extends Error {
 	httpStatusHint: number
+	details?: any // TODO JSON
 }
 
 interface RequestWithUserId extends Express.Request {

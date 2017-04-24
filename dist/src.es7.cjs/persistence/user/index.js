@@ -28,42 +28,22 @@ async function factory(dependencies = {}) {
     }
     async function read(userId) {
         validateUserIdOrThrow(userId);
-        console.log('reading...', userId, typeof userId);
-        return await userCollection.findOne({ id: userId })
-            .then(u => {
-            console.log(u);
-            return u;
-        });
+        return await userCollection.findOne({ id: userId });
     }
     async function update(userId, candidateData) {
         validateUserIdOrThrow(userId);
         hcard_1.validateKeysOrThrow(candidateData.hCard || {});
-        throw new Error('Not implemented!');
-        /*
-        let needUpdate = false
-        let existingData = await read(userId)
+        hcard_1.validateKeysOrThrow(candidateData.pendingHCardUpdates || {});
+        let existingData = await read(userId);
         if (!existingData) {
-            existingData = {}
-            needUpdate = true
+            const err = new Error(`User not found`);
+            err.httpStatusHint = 404;
+            err.details = { userId };
+            throw err;
         }
-        const fieldsToUpdate = Object.keys(candidateData)
-        const newData = existingData
-
-        console.log('data so far', existingData)
-        console.log('data to update', candidateData)
-
-        for (let key of fieldsToUpdate) {
-            if (existingData[key] === candidateData[key])
-                continue
-
-            needUpdate = true
-            newData[key] = candidateData[key]
-        }
-
-        if (needUpdate)
-            MEMORY_STORE[userId] = newData
-
-        console.log('data now', MEMORY_STORE[userId])*/
+        console.log('data so far', existingData);
+        console.log('data pending', lodash_1.defaultsDeep(candidateData, existingData));
+        await userCollection.updateOne({ id: userId }, candidateData);
     }
     async function purge(userId) {
         validateUserIdOrThrow(userId);
@@ -89,8 +69,6 @@ async function factory(dependencies = {}) {
             }
         });
     }
-    await read('1234');
-    await read('1234');
     return {
         create,
         read,

@@ -24,12 +24,10 @@ async function factory(dependencies = {}) {
     app.use(express.static(path.join(__dirname, 'public')));
     async function handleAsync(req, res) {
         let userData = await userCRUD.read(req.userId);
-        console.log('restoring...', userData);
-        //console.log('restoring...', userData, userData!.hCard, userData!.pendingHCardUpdates)
-        // TODO restore from live edit !
-        let editorHCardData = Object.assign({}, userData.hCard);
+        console.log('restoring...', userData, userData.hCard, userData.pendingHCardUpdates);
+        let editorHCardData = Object.assign({}, userData.hCard, userData.pendingHCardUpdates);
         const preRenderedHtml = renderedHtmlAsString(editorHCardData);
-        //console.log('restoring...', hCardData, fullHCardData, preRenderedHtml)
+        //console.log('restoring...', editorHCardData, preRenderedHtml)
         res.render('index', {
             preRenderedHtml,
             hCardData: editorHCardData,
