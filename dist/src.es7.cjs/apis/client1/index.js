@@ -5,7 +5,7 @@ const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
 const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
 };
-function factory(dependencies = {}) {
+async function factory(dependencies = {}) {
     const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies);
     logger.debug('Initializing the client1 API…');
     if (!hCardCRUD)

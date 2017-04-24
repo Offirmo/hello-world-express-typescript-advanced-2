@@ -16,22 +16,22 @@ const defaultDependencies: InjectableDependencies = {
 	logger: serverLoggerToConsole,
 }
 
-function factory(dependencies: Partial<InjectableDependencies> = {}) {
+async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies)
 	logger.debug('Hello from main route!')
 
 	const router = express.Router()
 
-	router.use('/', baseAppFactory({
+	router.use('/', await baseAppFactory({
 		logger,
 	}))
 
-	router.use('/', client1APIFactory({
+	router.use('/', await client1APIFactory({
 		logger,
 		hCardCRUD,
 	}))
 
-	router.use('/domain', client1AppFactory({
+	router.use('/domain', await client1AppFactory({
 		logger,
 		hCardCRUD,
 	}))

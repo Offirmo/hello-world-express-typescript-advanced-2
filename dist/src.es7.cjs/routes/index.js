@@ -8,18 +8,18 @@ const client1_2 = require("../apps/client1");
 const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
 };
-function factory(dependencies = {}) {
+async function factory(dependencies = {}) {
     const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies);
     logger.debug('Hello from main route!');
     const router = express.Router();
-    router.use('/', base_1.factory({
+    router.use('/', await base_1.factory({
         logger,
     }));
-    router.use('/', client1_1.factory({
+    router.use('/', await client1_1.factory({
         logger,
         hCardCRUD,
     }));
-    router.use('/domain', client1_2.factory({
+    router.use('/domain', await client1_2.factory({
         logger,
         hCardCRUD,
     }));

@@ -2,13 +2,22 @@ import { createServer } from 'http'
 import { createLogger } from 'bunyan'
 import { ServerLogger } from '@offirmo/loggers-types-and-stubs'
 import { MongoClient } from 'mongodb'
+import * as simplyconfig from 'simplyconfig'
 
 import { factory as expressAppFactory } from './express-app'
+
 
 async function factory() {
 	console.log('Starting_')
 
-	const PORT = process.env.PORT || 5000
+
+	const config = {
+		port: process.env.PORT || 5000,
+		isHttps: !!process.env.IS_HTTPS,
+		sessionSecret: process.env.SESSION_SECRET,
+		dbUrlMongo01: process.env.DB_URL_MONGO_01,
+		dbUrlRedis01: process.env.DB_URL_REDIS_01,
+	}
 
 
 	// TODO plug to a syslog
@@ -42,22 +51,24 @@ async function factory() {
 	logger.debug('Now listening to uncaughts and warnings.')
 
 
-	const dbMongo01 = await MongoClient.connect(url)
+	const dbMongo01 = await MongoClient.connect(config.dbUrlMongo01)
 
 
-	const server = createServer(expressAppFactory({
+	const server = createServer(await expressAppFactory({
 		logger,
+		sessionSecret: config.sessionSecret,
 		dbHCard: dbMongo01,
+		dbSessionRedisUrl: config.dbUrlRedis01,
 	}))
 
-	server.listen(PORT, (err: Error) => {
+	server.listen(config.port, (err: Error) => {
 		if (err) {
 			console.error(`Server error!`, err)
 			logger.fatal(err, `Server error!`)
 			return
 		}
 
-		logger.info(`Server launched, listening on :${PORT}`)
+		logger.info(`Server launched, listening on :${config.port}`)
 	})
 
 }

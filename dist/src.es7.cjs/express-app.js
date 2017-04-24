@@ -10,23 +10,19 @@ const helmet = require("helmet");
 const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
 const hcard_1 = require("./persistence/hcard");
 const routes_1 = require("./routes");
-const mongodb_1 = require("mongodb");
-const mongodb_url = 'mongodb://localhost:32772';
-mongodb_1.MongoClient.connect(mongodb_url, (err, db) => {
-    console.log("Connected correctly to server");
-    db.close();
-});
 const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
     sessionSecret: 'keyboard cat',
     isHttps: false,
 };
-function factory(dependencies = {}) {
-    const { logger, sessionSecret, isHttps, dbConnexionSettings } = Object.assign({}, defaultDependencies, dependencies);
+async function factory(dependencies = {}) {
+    const { logger, sessionSecret, isHttps, dbHCard, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies);
     logger.info('Initializing the top express app…');
     const RedisSessionStore = redisSession(session);
-    if (!dbConnexionSettings)
-        throw new Error('App: Need persistence settings!');
+    if (!dbHCard)
+        throw new Error('App: Need persistence link for hCards!');
+    if (!dbSessionRedisUrl)
+        logger.warn('XXX please provide a redis url for the session store !');
     // TODO HTTPS
     if (!isHttps)
         logger.warn('XXX please activate HTTPS on this server !');
@@ -41,7 +37,7 @@ function factory(dependencies = {}) {
         next();
     });
     // log the request as early as possible
-    app.use(morgan('combined')); // TODO remove
+    //app.use(morgan('combined')) // TODO remove
     app.use((req, res, next) => {
         logger.info({
             uuid: req.uuid,
@@ -54,10 +50,9 @@ function factory(dependencies = {}) {
     app.use(helmet());
     // https://github.com/expressjs/session
     app.use(session({
-        store: new RedisSessionStore({
-            host: 'localhost',
-            port: 32770,
-        }),
+        store: dbSessionRedisUrl
+            ? new RedisSessionStore({ url: dbSessionRedisUrl })
+            : undefined,
         secret: sessionSecret,
         resave: false,
         saveUninitialized: true,
@@ -87,9 +82,9 @@ function factory(dependencies = {}) {
         parameterLimit: 100,
         limit: '1Mb',
     }));
-    app.use(routes_1.factory({
+    app.use(await routes_1.factory({
         logger,
-        hCardCRUD: hcard_1.factory({ logger, dbConnexionSettings })
+        hCardCRUD: await hcard_1.factory({ logger, db: dbHCard })
     }));
     app.use((req, res) => {
         logger.error(`! 404 on "${req.path}" !"`);

@@ -15,7 +15,7 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 
-async function factory(dependencies: Partial<InjectableDependencies> = {}): CRUD<HCard> {
+async function factory(dependencies: Partial<InjectableDependencies> = {}): Promise<CRUD<HCard>> {
 	const { logger, db } = Object.assign({}, defaultDependencies, dependencies)
 	logger.debug('Hello from hcard persistence!')
 

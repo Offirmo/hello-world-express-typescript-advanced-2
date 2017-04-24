@@ -9,12 +9,12 @@ const server_rendered_index_1 = require("./server-rendered-index");
 const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
 };
-function factory(dependencies = {}) {
+async function factory(dependencies = {}) {
     const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies);
     logger.debug('Initializing the client1 webapp…');
     if (!hCardCRUD)
         throw new Error('Client1 app: can’t work without a persistence layer!');
-    const renderedHtmlAsString = server_rendered_index_1.factory({ logger }).renderToString;
+    const renderedHtmlAsString = (await server_rendered_index_1.factory({ logger })).renderToString;
     const app = express();
     // https://expressjs.com/en/guide/using-template-engines.html
     app.engine('dust', globals_1.consolidatedTemplates.dust); // *.dust templates will be rendered with...

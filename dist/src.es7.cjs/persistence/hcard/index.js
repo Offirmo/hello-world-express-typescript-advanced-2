@@ -5,11 +5,11 @@ const hcard_1 = require("../../models/hcard");
 const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
 };
-function factory(dependencies = {}) {
-    const { logger, dbConnexionSettings } = Object.assign({}, defaultDependencies, dependencies);
+async function factory(dependencies = {}) {
+    const { logger, db } = Object.assign({}, defaultDependencies, dependencies);
     logger.debug('Hello from hcard persistence!');
-    if (!dbConnexionSettings)
-        throw new Error('DB access need connexion settings!');
+    if (!db)
+        throw new Error('hCard persistence need a db connexion');
     const MEMORY_STORE = {};
     const ALLOWED_HCARD_KEYS = Object.keys(hcard_1.defaultHCard);
     function validateIdOrThrow(userId) {

@@ -18,6 +18,7 @@ interface InjectableDependencies {
 	sessionSecret: string
 	isHttps: boolean
 	dbHCard?: MongoDb
+	dbSessionRedisUrl?: string
 }
 
 
@@ -28,13 +29,16 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 async function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger, sessionSecret, isHttps, dbHCard } = Object.assign({}, defaultDependencies, dependencies)
+	const { logger, sessionSecret, isHttps, dbHCard, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies)
 	logger.info('Initializing the top express app…')
 
 	const RedisSessionStore = redisSession(session)
 
 	if (!dbHCard)
 		throw new Error('App: Need persistence link for hCards!')
+
+	if (!dbSessionRedisUrl)
+		logger.warn('XXX please provide a redis url for the session store !')
 
 	// TODO HTTPS
 	if (!isHttps)
@@ -55,7 +59,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	})
 
 	// log the request as early as possible
-	app.use(morgan('combined')) // TODO remove
+	//app.use(morgan('combined')) // TODO remove
 	app.use((req: RequestWithUUID, res, next) => {
 		logger.info({
 			uuid: req.uuid,
@@ -70,10 +74,9 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	// https://github.com/expressjs/session
 	app.use(session({
-		store: new RedisSessionStore({
-			host: 'localhost',
-			port: 32770,
-		}),
+		store: dbSessionRedisUrl
+			? new RedisSessionStore({ url: dbSessionRedisUrl })
+			: undefined,
 		secret: sessionSecret,
 		resave: false,
 		saveUninitialized: true,

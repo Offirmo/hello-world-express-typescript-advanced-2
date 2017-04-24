@@ -26,7 +26,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	if(!hCardCRUD)
 		throw new Error('Client1 app: can’t work without a persistence layer!')
 
-	const renderedHtmlAsString = renderedHtmlAsStringFactory({ logger }).renderToString
+	const renderedHtmlAsString = (await renderedHtmlAsStringFactory({ logger })).renderToString
 
 	const app = express()
 

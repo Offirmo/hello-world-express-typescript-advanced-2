@@ -18,6 +18,11 @@ require('dustjs-helpers') // also
 dust.optimizers.format = (ctx, node) => node
 
 
+import * as simplyconfig from 'simplyconfig'
+// Load .env into process.env
+simplyconfig.dotenv.load({ silent: true })
+
+
 export {
 	consolidatedTemplates,
 	dust,
