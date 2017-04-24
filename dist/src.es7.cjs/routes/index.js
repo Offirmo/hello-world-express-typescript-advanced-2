@@ -1,15 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
-const client1_1 = require("../apps/client1");
+const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
+const base_1 = require("../apps/base");
+const client1_1 = require("../apis/client1");
+const client1_2 = require("../apps/client1");
 const defaultDependencies = {
-    logger: console,
+    logger: loggers_types_and_stubs_1.serverLoggerToConsole,
 };
 function factory(dependencies = {}) {
     const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies);
-    logger.log('Hello from a route!');
+    logger.debug('Hello from main route!');
     const router = express.Router();
+    router.use('/', base_1.factory({
+        logger,
+    }));
     router.use('/', client1_1.factory({
+        logger,
+        hCardCRUD,
+    }));
+    router.use('/domain', client1_2.factory({
         logger,
         hCardCRUD,
     }));

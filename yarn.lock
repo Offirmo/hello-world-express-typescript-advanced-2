@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@offirmo/loggers-types-and-stubs@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@offirmo/loggers-types-and-stubs/-/loggers-types-and-stubs-0.0.3.tgz#c72c11f89c719f519fc6701f8418efc58a24a88c"
+
 "@types/bluebird@*":
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.2.tgz#ecf1104217495e50fe0b588d538146cd6f733b89"

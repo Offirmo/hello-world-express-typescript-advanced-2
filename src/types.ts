@@ -1,22 +1,30 @@
 import * as Express from 'express'
 
 
-// TODO cleanup
-interface RequestWithUserId extends Express.Request {
-	userId: string // to be set via session
-}
-
-interface ExtendedRequest extends RequestWithUserId, Express.Request {
-	uuid: string // module uuid
-	body: object // body parser TODO use JSON type
-}
-
 interface ExtendedError extends Error {
 	httpStatusHint: number
 }
 
+interface RequestWithUserId extends Express.Request {
+	userId: string // to be set via session
+}
+
+interface RequestWithUUID extends Express.Request {
+	uuid: string // module uuid
+}
+
+interface RequestWithParsedBody extends Express.Request {
+	body: object // body parser TODO use JSON type
+}
+
+interface ExtendedRequest extends RequestWithUserId, RequestWithUUID, RequestWithParsedBody {
+	body: object // copy to resolve the conflict
+}
 
 export {
 	ExtendedError,
+	RequestWithUserId,
+	RequestWithUUID,
+	RequestWithParsedBody,
 	ExtendedRequest,
 }

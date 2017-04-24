@@ -1,29 +1,27 @@
 import * as path from 'path'
 import * as express from 'express'
+import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-stubs'
 
 import { CRUD } from '../../persistence/types'
 import { HCard, defaultHCard } from '../../models/hcard'
+import { RequestWithUserId } from "../../types";
 
 import { consolidatedTemplates } from '../../globals'
 import { factory as renderedHtmlAsStringFactory } from './server-rendered-index'
 
 
-interface RequestWithUserId extends express.Request {
-	userId: string
-}
-
 interface InjectableDependencies {
-	logger: Console
+	logger: ServerLogger
 	hCardCRUD?: CRUD<HCard>
 }
 
 const defaultDependencies: InjectableDependencies = {
-	logger: console,
+	logger: serverLoggerToConsole,
 }
 
 function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies)
-	logger.log('Hello from an app!')
+	logger.debug('Hello from client1 app!')
 
 	if(!hCardCRUD)
 		throw new Error('Client1 app: can’t work without a persistence layer!')
@@ -46,7 +44,7 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		const fullHCardData: HCard = Object.assign({}, defaultHCard, hCardData)
 
 		const preRenderedHtml = renderedHtmlAsString(fullHCardData)
-		console.log('restoring...', hCardData, fullHCardData, preRenderedHtml)
+		//console.log('restoring...', hCardData, fullHCardData, preRenderedHtml)
 
 		res.render('index', {
 			preRenderedHtml,
@@ -56,18 +54,6 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	app.get('/', (req: RequestWithUserId, res, next) => {
 		handleAsync(req, res)
-			.catch(next)
-	})
-
-	app.post('/update', (req: RequestWithUserId, res, next) => {
-		hCardCRUD.update(req.userId, req.body)
-			.then(() => void res.end())
-			.catch(next)
-	})
-
-	app.post('/submit', (req: RequestWithUserId, res, next) => {
-		hCardCRUD.update(req.userId, req.body)
-			.then(() => void res.end())
 			.catch(next)
 	})
 

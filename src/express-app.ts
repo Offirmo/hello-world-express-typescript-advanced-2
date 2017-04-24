@@ -4,15 +4,16 @@ import * as session from 'express-session'
 import { urlencoded as bodyUrlencodedParser} from 'body-parser'
 import * as morgan from 'morgan'
 import * as helmet from 'helmet'
+import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-stubs'
 
 import { factory as sessionCRUDFactory } from './persistence/session'
 import { factory as hCardCRUDFactory } from './persistence/hcard'
 import { factory as routesFactory } from './routes'
-import { ExtendedRequest } from './types'
+import { RequestWithUUID, ExtendedRequest } from "./types";
 
 
 interface InjectableDependencies {
-	logger: Console
+	logger: ServerLogger
 	sessionSecret: string
 	isHttps: boolean
 	dbConnexionSettings?: any
@@ -20,7 +21,7 @@ interface InjectableDependencies {
 
 
 const defaultDependencies: InjectableDependencies = {
-	logger: console,
+	logger: serverLoggerToConsole,
 	sessionSecret: 'keyboard cat',
 	isHttps: false,
 }
@@ -51,16 +52,16 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	app.enable('trust proxy')
 	app.disable('x-powered-by') // safety
 
-	app.use(function assignId(req, res, next) {
-		(req as any).uuid = uuid.v4()
+	app.use(function assignId(req: RequestWithUUID, res, next) {
+		req.uuid = uuid.v4()
 		next()
 	})
 
 	// log the request as early as possible
 	app.use(morgan('combined')) // TODO remove
-	app.use((req, res, next) => {
+	app.use((req: RequestWithUUID, res, next) => {
 		logger.info({
-			uuid: (req as any).uuid,
+			uuid: req.uuid,
 			method: morgan['method'](req),
 			url: morgan['url'](req),
 		})
@@ -82,6 +83,7 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	}))
 
 	// Use the session to link to a user ID
+	// TODO
 	let crudeUserIdGenerator = 0
 	const sessionKey = Symbol('session to user')
 	app.use(async (req: ExtendedRequest, res, next) => {
@@ -92,6 +94,7 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			session = {
 				userId: `${++crudeUserIdGenerator}`
 			}
+			// TODO
 			console.log('created userId', session.userId)
 			await sessionCRUD.create(sessionId, session)
 		}
@@ -100,7 +103,7 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		req.userId = userId!
 
 		logger.info({
-			uuid: (req as any).uuid,
+			uuid: req.uuid,
 			sessionId,
 			userId,
 		})
@@ -108,6 +111,7 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	})
 
 	app.use(bodyUrlencodedParser({
+		extended: false,
 		parameterLimit: 100, // less than the default
 		limit: '1Mb', // for profile image
 	}))

@@ -1,3 +1,5 @@
+import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-stubs'
+
 import { ExtendedError } from './../../types'
 import { CRUD } from '../types'
 
@@ -7,18 +9,18 @@ interface Session {
 }
 
 interface InjectableDependencies {
-	logger: Console,
+	logger: ServerLogger,
 	dbConnexionSettings?: any
 }
 
 const defaultDependencies: InjectableDependencies = {
-	logger: console,
+	logger: serverLoggerToConsole,
 }
 
 
 function factory(dependencies: Partial<InjectableDependencies> = {}): CRUD<Session> {
 	const { logger, dbConnexionSettings } = Object.assign({}, defaultDependencies, dependencies)
-	logger.log('Hello from session persistence!')
+	logger.debug('Hello from session persistence!')
 
 	if (!dbConnexionSettings)
 		throw new Error('DB access need connexion settings!')

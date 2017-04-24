@@ -25,6 +25,7 @@
     "__shortcuts": "~~~~~~ Shortcuts ~~~~~~"
   },
   "dependencies": {
+    "@offirmo/loggers-types-and-stubs": "^0.0.3",
     "body-parser": "^1.17.1",
     "bunyan": "^1.8.10",
     "consolidate": "^0.14.5",

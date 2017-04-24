@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
 const hcard_1 = require("../../models/hcard");
 const defaultDependencies = {
-    logger: console,
+    logger: loggers_types_and_stubs_1.serverLoggerToConsole,
 };
 function factory(dependencies = {}) {
     const { logger, dbConnexionSettings } = Object.assign({}, defaultDependencies, dependencies);
-    logger.log('Hello from hcard persistence!');
+    logger.debug('Hello from hcard persistence!');
     if (!dbConnexionSettings)
         throw new Error('DB access need connexion settings!');
     const MEMORY_STORE = {};

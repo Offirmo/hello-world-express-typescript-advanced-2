@@ -1,20 +1,22 @@
+import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-stubs'
+
 import { ExtendedError } from './../../types'
 import { HCard, defaultHCard } from '../../models/hcard'
 import { CRUD } from '../types'
 
 interface InjectableDependencies {
-	logger: Console,
+	logger: ServerLogger,
 	dbConnexionSettings?: any
 }
 
 const defaultDependencies: InjectableDependencies = {
-	logger: console,
+	logger: serverLoggerToConsole,
 }
 
 
 function factory(dependencies: Partial<InjectableDependencies> = {}): CRUD<HCard> {
 	const { logger, dbConnexionSettings } = Object.assign({}, defaultDependencies, dependencies)
-	logger.log('Hello from hcard persistence!')
+	logger.debug('Hello from hcard persistence!')
 
 	if (!dbConnexionSettings)
 		throw new Error('DB access need connexion settings!')

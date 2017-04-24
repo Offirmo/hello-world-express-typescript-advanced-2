@@ -1,26 +1,24 @@
 import { Request, Router } from 'express'
+import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-stubs'
 
 import { CRUD } from '../../persistence/types'
 import { HCard } from '../../models/hcard'
+import { RequestWithUserId } from "../../types";
 
-
-interface RequestWithUserId extends Request {
-	userId: string
-}
 
 interface InjectableDependencies {
-	logger: Console
+	logger: ServerLogger
 	hCardCRUD?: CRUD<HCard>
 }
 
 const defaultDependencies: InjectableDependencies = {
-	logger: console,
+	logger: serverLoggerToConsole,
 }
 
 
 function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies)
-	logger.log('Hello from an API!')
+	logger.debug('* Client1 API instanciating…')
 
 	if(!hCardCRUD)
 		throw new Error('hCard API: can’t work without a persistence layer!')
@@ -35,8 +33,8 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	router.post('/submit', (req: RequestWithUserId, res, next) => {
 		hCardCRUD.update(req.userId, req.body)
-		.then(() => void res.end())
-		.catch(next)
+			.then(() => void res.end())
+			.catch(next)
 	})
 
 	return router

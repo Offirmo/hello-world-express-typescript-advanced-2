@@ -6,11 +6,12 @@ const session = require("express-session");
 const body_parser_1 = require("body-parser");
 const morgan = require("morgan");
 const helmet = require("helmet");
+const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
 const session_1 = require("./persistence/session");
 const hcard_1 = require("./persistence/hcard");
 const routes_1 = require("./routes");
 const defaultDependencies = {
-    logger: console,
+    logger: loggers_types_and_stubs_1.serverLoggerToConsole,
     sessionSecret: 'keyboard cat',
     isHttps: false,
 };
@@ -59,6 +60,7 @@ function factory(dependencies = {}) {
         }
     }));
     // Use the session to link to a user ID
+    // TODO
     let crudeUserIdGenerator = 0;
     const sessionKey = Symbol('session to user');
     app.use(async (req, res, next) => {
@@ -69,6 +71,7 @@ function factory(dependencies = {}) {
             session = {
                 userId: `${++crudeUserIdGenerator}`
             };
+            // TODO
             console.log('created userId', session.userId);
             await sessionCRUD.create(sessionId, session);
         }
@@ -83,6 +86,7 @@ function factory(dependencies = {}) {
         next();
     });
     app.use(body_parser_1.urlencoded({
+        extended: false,
         parameterLimit: 100,
         limit: '1Mb',
     }));

@@ -2,15 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const express = require("express");
+const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
 const hcard_1 = require("../../models/hcard");
 const globals_1 = require("../../globals");
 const server_rendered_index_1 = require("./server-rendered-index");
 const defaultDependencies = {
-    logger: console,
+    logger: loggers_types_and_stubs_1.serverLoggerToConsole,
 };
 function factory(dependencies = {}) {
     const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies);
-    logger.log('Hello from an app!');
+    logger.debug('Hello from client1 app!');
     if (!hCardCRUD)
         throw new Error('Client1 app: can’t work without a persistence layer!');
     const renderedHtmlAsString = server_rendered_index_1.factory({ logger }).renderToString;
@@ -26,7 +27,7 @@ function factory(dependencies = {}) {
         let hCardData = await hCardCRUD.read(req.userId) || {};
         const fullHCardData = Object.assign({}, hcard_1.defaultHCard, hCardData);
         const preRenderedHtml = renderedHtmlAsString(fullHCardData);
-        console.log('restoring...', hCardData, fullHCardData, preRenderedHtml);
+        //console.log('restoring...', hCardData, fullHCardData, preRenderedHtml)
         res.render('index', {
             preRenderedHtml,
             hCardData: fullHCardData,
@@ -34,16 +35,6 @@ function factory(dependencies = {}) {
     }
     app.get('/', (req, res, next) => {
         handleAsync(req, res)
-            .catch(next);
-    });
-    app.post('/update', (req, res, next) => {
-        hCardCRUD.update(req.userId, req.body)
-            .then(() => void res.end())
-            .catch(next);
-    });
-    app.post('/submit', (req, res, next) => {
-        hCardCRUD.update(req.userId, req.body)
-            .then(() => void res.end())
             .catch(next);
     });
     return app;
