@@ -91,10 +91,11 @@ async function factory(dependencies = {}) {
         logger.error(`! 404 on "${req.path}" !"`);
         res.status(404).end();
     });
-    app.use((err, req, res, next) => {
+    const errorHandler = (err, req, res, next) => {
         logger.error(err.stack);
         res.status(500).send('Something broke !');
-    });
+    };
+    app.use(errorHandler);
     return app;
 }
 exports.factory = factory;

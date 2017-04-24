@@ -4,6 +4,7 @@ import { ServerLogger } from '@offirmo/loggers-types-and-stubs'
 import { MongoClient } from 'mongodb'
 
 import { factory as expressAppFactory } from './express-app'
+import {ExtendedError} from "./types";
 
 
 async function factory() {
@@ -26,7 +27,7 @@ async function factory() {
 	})
 	logger.info('Logger ready.')
 
-	process.on('uncaughtException', err => {
+	process.on('uncaughtException', (err: ExtendedError) => {
 		console.error(`Uncaught exception!`, err)
 		setTimeout(() => process.exit(1), 250)
 		logger.fatal(err, `Uncaught exception!`)
@@ -34,15 +35,15 @@ async function factory() {
 		// I've an experimental module for that…
 	})
 
-	process.on('unhandledRejection', (reason, p) => {
+	process.on('unhandledRejection', (reason: ExtendedError | any, p: Promise<any>) => {
 		console.error('Unhandled Rejection at: Promise', p, 'reason:', reason);
 		setTimeout(() => process.exit(1), 250)
-		logger.fatal({ reason, p }, `Uncaught exceptionUncaught exception!`)
+		logger.fatal({ reason, p }, `Uncaught rejection!`)
 		// TODO cleanup
 		// I've an experimental module for that…
 	})
 
-	process.on('warning', warning => {
+	process.on('warning', (warning: { name: string, message: string, stack: string}) => {
 		console.warn(warning)
 		logger.warn(warning)
 	})

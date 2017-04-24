@@ -15,7 +15,7 @@ const dust = require('dustjs-linkedin') // http://dejanglozic.com/2014/01/27/dus
 require('dustjs-helpers') // also
 // config : remove whitespace suppression or it wrecks javascript
 // https://github.com/linkedin/dustjs/wiki/Dust-Tutorial#controlling-whitespace-suppression
-dust.optimizers.format = (ctx, node) => node
+dust.optimizers.format = (ctx: any, node: any) => node
 
 
 import * as simplyconfig from 'simplyconfig'

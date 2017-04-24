@@ -62,8 +62,8 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	app.use((req: RequestWithUUID, res, next) => {
 		logger.info({
 			uuid: req.uuid,
-			method: morgan['method'](req),
-			url: morgan['url'](req),
+			method: (morgan as any)['method'](req),
+			url: (morgan as any)['url'](req),
 		})
 		next()
 	})
@@ -123,10 +123,11 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		res.status(404).end()
 	})
 
-	app.use((err, req, res, next) => {
+	const errorHandler: express.ErrorRequestHandler = (err, req, res, next) => {
 		logger.error(err.stack)
 		res.status(500).send('Something broke !')
-	})
+	}
+	app.use(errorHandler)
 
 	return app
 }

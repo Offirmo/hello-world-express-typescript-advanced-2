@@ -4,7 +4,7 @@ import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-
 
 import { CRUD } from '../../persistence/types'
 import { User } from '../../models/user'
-import { HCard, defaultHCard } from '../../models/hcard'
+import { HCard } from '../../models/hcard'
 import { RequestWithUserId } from "../../types";
 
 import { consolidatedTemplates } from '../../globals'
@@ -40,7 +40,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	// REM: respond with index.html when a GET request is made to the homepage
 	app.use(express.static(path.join(__dirname, 'public')))
 
-	async function handleAsync(req: RequestWithUserId, res) {
+	async function handleAsync(req: RequestWithUserId, res: express.Response) {
 		let userData = await userCRUD!.read(req.userId)
 
 		console.log('restoring...', userData, userData!.hCard, userData!.pendingHCardUpdates)

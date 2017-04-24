@@ -63,7 +63,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}): Prom
 			err.details = { userId }
 			throw err
 		}
-		
+
 		console.log('data so far', existingData)
 		console.log('data pending', defaultsDeep(candidateData, existingData))
 
