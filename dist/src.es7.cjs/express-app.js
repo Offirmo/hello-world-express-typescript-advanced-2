@@ -16,7 +16,8 @@ const defaultDependencies = {
     isHttps: false,
 };
 async function factory(dependencies = {}) {
-    const { logger, sessionSecret, isHttps, dbUsers, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies);
+    const { logger, isHttps, dbUsers, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies);
+    let { sessionSecret } = Object.assign({}, defaultDependencies, dependencies);
     logger.debug('Initializing the top express app…');
     const RedisSessionStore = redisSession(session);
     if (!dbUsers)
@@ -25,6 +26,7 @@ async function factory(dependencies = {}) {
         logger.warn('XXX please provide a redis url for the session store !');
     if (!isHttps)
         logger.warn('XXX please activate HTTPS on this server !');
+    sessionSecret = sessionSecret || defaultDependencies.sessionSecret;
     if (sessionSecret === defaultDependencies.sessionSecret)
         logger.warn('XXX please set a secret for the session middleware !');
     const app = express();

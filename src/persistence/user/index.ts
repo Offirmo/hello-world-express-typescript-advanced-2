@@ -63,7 +63,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}): Prom
 			throw err
 		}
 
-		await userCollection.updateOne({ id: userId }, candidateData)
+		await userCollection.updateOne({ id: userId }, defaultsDeep({}, candidateData, existingData))
 	}
 
 

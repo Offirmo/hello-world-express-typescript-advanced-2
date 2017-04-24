@@ -10,22 +10,13 @@ import {ExtendedError} from "./types";
 async function factory() {
 	console.log('Starting_')
 
-
-	const config = {
-		port: process.env.PORT || 5000,
-		isHttps: !!process.env.IS_HTTPS,
-		sessionSecret: process.env.SESSION_SECRET,
-		dbUrlMongo01: process.env.DB_URL_MONGO_01,
-		dbUrlRedis01: process.env.DB_URL_REDIS_01,
-	}
-
-
 	// TODO plug to a syslog
 	const logger: ServerLogger = createLogger({
 		name: 'ServerX',
 		level: 'debug',
 	})
 	logger.info('Logger ready.')
+
 
 	process.on('uncaughtException', (err: ExtendedError) => {
 		console.error(`Uncaught exception!`, err)
@@ -51,6 +42,22 @@ async function factory() {
 	logger.debug('Now listening to uncaughts and warnings.')
 
 
+	const config = {
+		port: process.env.PORT || 5000,
+		isHttps: !!process.env.IS_HTTPS,
+		sessionSecret: process.env.SESSION_SECRET,
+		dbUrlMongo01: process.env.DB_URL_MONGO_01,
+		dbUrlRedis01: process.env.DB_URL_REDIS_01,
+	}
+	if (!config.dbUrlMongo01) {
+		logger.fatal('Missing config DB_URL_MONGO_01')
+		throw new Error('Missing or invalid configuration (env var): DB_URL_MONGO_01')
+	}
+	if (!config.dbUrlRedis01) {
+		logger.fatal('Missing config DB_URL_REDIS_01')
+		throw new Error('Missing or invalid configuration (env var): DB_URL_REDIS_01')
+	}
+
 	const dbMongo01 = await MongoClient.connect(config.dbUrlMongo01)
 
 
@@ -75,3 +82,6 @@ async function factory() {
 }
 
 factory()
+.catch(e => {
+	console.error('Server failed to launch:', e.message)
+})

@@ -15,6 +15,10 @@ References:
 
 
 ## Installation and launch
+
+### prerequisites
+This app needs node >= 7
+
 This app needs a Redis and a Mongo database. Suggestion: use the default docker images.
 * https://hub.docker.com/r/library/mongo/
 * https://hub.docker.com/r/library/redis/
@@ -25,14 +29,17 @@ echo 'DB_URL_MONGO_01="mongodb://localhost:32773"' >> .env
 echo 'DB_URL_REDIS_01="redis://localhost:32774"' >> .env
 ```
 
-Then:
+### Launch
 ```bash
-nvm install   <- or any other way to have nove >= 7
-yarn
+yarn --production
 yarn start
-yarn | ./node_modules/.bin/bunyan
 ```
 
+For more readable logs:
+```bash
+npm i bunyan
+yarn start | ./node_modules/.bin/bunyan
+```
 
 ## Contributing
 see [[CONTRIBUTING.md]]

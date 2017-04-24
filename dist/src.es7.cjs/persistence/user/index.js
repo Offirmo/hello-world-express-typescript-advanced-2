@@ -40,7 +40,7 @@ async function factory(dependencies = {}) {
             err.details = { userId };
             throw err;
         }
-        await userCollection.updateOne({ id: userId }, candidateData);
+        await userCollection.updateOne({ id: userId }, lodash_1.defaultsDeep({}, candidateData, existingData));
     }
     async function purge(userId) {
         validateUserIdOrThrow(userId);

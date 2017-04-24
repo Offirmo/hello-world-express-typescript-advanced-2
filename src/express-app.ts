@@ -28,7 +28,8 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 async function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger, sessionSecret, isHttps, dbUsers, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies)
+	const { logger, isHttps, dbUsers, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies)
+	let { sessionSecret } = Object.assign({}, defaultDependencies, dependencies)
 	logger.debug('Initializing the top express app…')
 
 	const RedisSessionStore = redisSession(session)
@@ -42,6 +43,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	if (!isHttps)
 		logger.warn('XXX please activate HTTPS on this server !')
 
+	sessionSecret = sessionSecret || defaultDependencies.sessionSecret
 	if (sessionSecret === defaultDependencies.sessionSecret)
 		logger.warn('XXX please set a secret for the session middleware !')
 

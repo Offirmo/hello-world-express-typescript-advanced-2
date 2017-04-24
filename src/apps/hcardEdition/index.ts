@@ -79,11 +79,11 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 <!DOCTYPE html>
 <head>
 	<title>Live hCard Preview, by Yves Jutard</title>
-	<link href="domain/css/bootstrap.min.css" rel="stylesheet" >
-	<link href="domain/css/main.css" rel="stylesheet">
+	<link href="css/bootstrap.min.css" rel="stylesheet" >
+	<link href="css/main.css" rel="stylesheet">
 </head>
 Saved.<br />
-<a href="/domain">Go back to edition</a>
+<a href="/">Go back to edition</a>
 	`)
 		})
 		.catch(next)
