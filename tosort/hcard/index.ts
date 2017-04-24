@@ -15,19 +15,39 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 
-async function factory(dependencies: Partial<InjectableDependencies> = {}): CRUD<HCard> {
+function factory(dependencies: Partial<InjectableDependencies> = {}): CRUD<HCard> {
 	const { logger, db } = Object.assign({}, defaultDependencies, dependencies)
 	logger.debug('Hello from hcard persistence!')
 
 	if (!db)
 		throw new Error('hCard persistence need a db connexion')
 
-	const MEMORY_STORE: { [k: string]: Partial<HCard> } = {}
+	const userCollection = db.collection('users')
 
 	const ALLOWED_HCARD_KEYS: string[] = Object.keys(defaultHCard)
 
+	// XXX
+	// for the sake of the exercise, let's pretend we have existing data
+	const uniqueUser = await userCollection.findOne({id: 1234})
+	console.log(uniqueUser)
+	/*if (!uniqueUser) {
+		await
+	}
+	res = {
+		givenName: 'Sam',
+		surname: 'Fairfax',
+		email: 'sam.fairfax@fairfaxmedia.com.au',
+		phone: '0292822833',
+		houseNumber: '100',
+		street: 'Harris Street',
+		suburb: 'Pyrmont',
+		state: 'NSW',
+		postcode: '2009',
+		country: 'Australia'
+	}*/
 
-	function validateIdOrThrow(userId: string): void {
+
+	function validateUserIdOrThrow(userId: string): void {
 		if (userId) return
 
 		const err = new Error('hCard CRUD: missing user Id!') as ExtendedError
@@ -56,33 +76,16 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}): CRUD
 
 
 	async function read(userId: string): Promise<Partial<HCard>> {
-		validateIdOrThrow(userId)
+		validateUserIdOrThrow(userId)
 
-		let res = MEMORY_STORE[userId]
-		if (!res) {
-			// XXX
-			// for the sake of the exercise, let's pretend we have existing data
-			res = {
-				givenName: 'Sam',
-				surname: 'Fairfax',
-				email: 'sam.fairfax@fairfaxmedia.com.au',
-				phone: '0292822833',
-				houseNumber: '100',
-				street: 'Harris Street',
-				suburb: 'Pyrmont',
-				state: 'NSW',
-				postcode: '2009',
-				country: 'Australia'
-			}
-		}
-		if (res) res = Object.assign({}, res)
+		let user = await userCollection.findOne({id: userId})
 
-		return res
+		return user.hCard
 	}
 
 
 	async function update(userId: string, candidateData: Partial<HCard>): Promise<void> {
-		validateIdOrThrow(userId)
+		validateUserIdOrThrow(userId)
 		validateKeysOrThrow(candidateData)
 
 		let needUpdate = false
@@ -113,7 +116,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}): CRUD
 
 
 	async function purge(userId: string): Promise<void> {
-		validateIdOrThrow(userId)
+		validateUserIdOrThrow(userId)
 
 		delete MEMORY_STORE[userId]
 	}

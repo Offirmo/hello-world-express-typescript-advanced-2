@@ -7,10 +7,10 @@ const defaultDependencies = {
 };
 function factory(dependencies = {}) {
     const { logger } = Object.assign({}, defaultDependencies, dependencies);
-    logger.debug('Hello from base app!');
+    logger.debug('Initializing the base webapp…');
     const app = express.Router();
     app.get('/', (req, res) => {
-        res.send('hello');
+        res.send('This is not what you are looking for. Maybe you should check the instructions ?');
     });
     return app;
 }

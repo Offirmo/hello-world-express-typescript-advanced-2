@@ -12,7 +12,7 @@ interface InjectableDependencies {
 const defaultDependencies: InjectableDependencies = {
 }
 
-function factory(dependencies: Partial<InjectableDependencies> = {}) {
+async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const {} = Object.assign({}, defaultDependencies, dependencies)
 
 	function renderToString(props: HCard) {

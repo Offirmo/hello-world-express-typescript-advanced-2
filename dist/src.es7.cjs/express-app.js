@@ -3,13 +3,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const uuid = require("uuid");
 const session = require("express-session");
+const redisSession = require("connect-redis");
 const body_parser_1 = require("body-parser");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
-const session_1 = require("./persistence/session");
 const hcard_1 = require("./persistence/hcard");
 const routes_1 = require("./routes");
+const mongodb_1 = require("mongodb");
+const mongodb_url = 'mongodb://localhost:32772';
+mongodb_1.MongoClient.connect(mongodb_url, (err, db) => {
+    console.log("Connected correctly to server");
+    db.close();
+});
 const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
     sessionSecret: 'keyboard cat',
@@ -17,7 +23,8 @@ const defaultDependencies = {
 };
 function factory(dependencies = {}) {
     const { logger, sessionSecret, isHttps, dbConnexionSettings } = Object.assign({}, defaultDependencies, dependencies);
-    logger.info('Hello from express app!'); // TODO remove
+    logger.info('Initializing the top express app…');
+    const RedisSessionStore = redisSession(session);
     if (!dbConnexionSettings)
         throw new Error('App: Need persistence settings!');
     // TODO HTTPS
@@ -25,10 +32,6 @@ function factory(dependencies = {}) {
         logger.warn('XXX please activate HTTPS on this server !');
     if (sessionSecret === defaultDependencies.sessionSecret)
         logger.warn('XXX please set a secret for the session middleware !');
-    const sessionCRUD = session_1.factory({
-        logger,
-        dbConnexionSettings,
-    });
     const app = express();
     // https://expressjs.com/en/4x/api.html#app.settings.table
     app.enable('trust proxy');
@@ -50,8 +53,11 @@ function factory(dependencies = {}) {
     // TODO activate CORS
     app.use(helmet());
     // https://github.com/expressjs/session
-    // TODO store sessions in Redis
     app.use(session({
+        store: new RedisSessionStore({
+            host: 'localhost',
+            port: 32770,
+        }),
         secret: sessionSecret,
         resave: false,
         saveUninitialized: true,
@@ -59,29 +65,20 @@ function factory(dependencies = {}) {
             secure: isHttps,
         }
     }));
-    // Use the session to link to a user ID
-    // TODO
-    let crudeUserIdGenerator = 0;
-    const sessionKey = Symbol('session to user');
+    // link the session to a user ID
     app.use(async (req, res, next) => {
-        // TODO
-        const sessionId = req.session.id;
-        let session = await sessionCRUD.read(sessionId);
-        if (!session) {
-            session = {
-                userId: `${++crudeUserIdGenerator}`
-            };
-            // TODO
-            console.log('created userId', session.userId);
-            await sessionCRUD.create(sessionId, session);
+        if (!req.session.userId) {
+            // NOTE
+            // This is an exercise
+            // We are supposing the user is previously connected
+            // Thus we are always using the same user:
+            req.session.userId = 1234;
         }
-        const { userId } = session;
-        console.log({ userId });
-        req.userId = userId;
+        req.userId = req.session.userId;
         logger.info({
             uuid: req.uuid,
-            sessionId,
-            userId,
+            sessionId: req.session.id,
+            userId: req.userId,
         });
         next();
     });

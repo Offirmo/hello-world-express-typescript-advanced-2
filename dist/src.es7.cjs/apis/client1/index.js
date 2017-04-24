@@ -7,7 +7,7 @@ const defaultDependencies = {
 };
 function factory(dependencies = {}) {
     const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies);
-    logger.debug('* Client1 API instanciating…');
+    logger.debug('Initializing the client1 API…');
     if (!hCardCRUD)
         throw new Error('hCard API: can’t work without a persistence layer!');
     const router = express_1.Router();

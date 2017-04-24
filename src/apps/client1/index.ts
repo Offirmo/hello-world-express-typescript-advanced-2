@@ -19,9 +19,9 @@ const defaultDependencies: InjectableDependencies = {
 	logger: serverLoggerToConsole,
 }
 
-function factory(dependencies: Partial<InjectableDependencies> = {}) {
+async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies)
-	logger.debug('Hello from client1 app!')
+	logger.debug('Initializing the client1 webapp…')
 
 	if(!hCardCRUD)
 		throw new Error('Client1 app: can’t work without a persistence layer!')

@@ -16,9 +16,9 @@ const defaultDependencies: InjectableDependencies = {
 }
 
 
-function factory(dependencies: Partial<InjectableDependencies> = {}) {
+async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const { logger, hCardCRUD } = Object.assign({}, defaultDependencies, dependencies)
-	logger.debug('* Client1 API instanciating…')
+	logger.debug('Initializing the client1 API…')
 
 	if(!hCardCRUD)
 		throw new Error('hCard API: can’t work without a persistence layer!')

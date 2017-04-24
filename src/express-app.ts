@@ -1,22 +1,23 @@
 import * as express from 'express'
 import * as uuid from 'uuid'
 import * as session from 'express-session'
+import * as redisSession from 'connect-redis'
 import { urlencoded as bodyUrlencodedParser} from 'body-parser'
 import * as morgan from 'morgan'
 import * as helmet from 'helmet'
 import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-stubs'
+import { Db as MongoDb } from 'mongodb'
 
-import { factory as sessionCRUDFactory } from './persistence/session'
 import { factory as hCardCRUDFactory } from './persistence/hcard'
 import { factory as routesFactory } from './routes'
-import { RequestWithUUID, ExtendedRequest } from "./types";
+import { RequestWithUUID, ExtendedRequest } from "./types"
 
 
 interface InjectableDependencies {
 	logger: ServerLogger
 	sessionSecret: string
 	isHttps: boolean
-	dbConnexionSettings?: any
+	dbHCard?: MongoDb
 }
 
 
@@ -26,14 +27,14 @@ const defaultDependencies: InjectableDependencies = {
 	isHttps: false,
 }
 
+async function factory(dependencies: Partial<InjectableDependencies> = {}) {
+	const { logger, sessionSecret, isHttps, dbHCard } = Object.assign({}, defaultDependencies, dependencies)
+	logger.info('Initializing the top express app…')
 
-function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger, sessionSecret, isHttps, dbConnexionSettings } = Object.assign({}, defaultDependencies, dependencies)
+	const RedisSessionStore = redisSession(session)
 
-	logger.info('Hello from express app!') // TODO remove
-
-	if (!dbConnexionSettings)
-		throw new Error('App: Need persistence settings!')
+	if (!dbHCard)
+		throw new Error('App: Need persistence link for hCards!')
 
 	// TODO HTTPS
 	if (!isHttps)
@@ -42,10 +43,6 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	if (sessionSecret === defaultDependencies.sessionSecret)
 		logger.warn('XXX please set a secret for the session middleware !')
 
-	const sessionCRUD = sessionCRUDFactory({
-		logger,
-		dbConnexionSettings,
-	})
 	const app = express()
 
 	// https://expressjs.com/en/4x/api.html#app.settings.table
@@ -72,8 +69,11 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	app.use(helmet())
 
 	// https://github.com/expressjs/session
-	// TODO store sessions in Redis
 	app.use(session({
+		store: new RedisSessionStore({
+			host: 'localhost',
+			port: 32770,
+		}),
 		secret: sessionSecret,
 		resave: false,
 		saveUninitialized: true,
@@ -82,31 +82,25 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		}
 	}))
 
-	// Use the session to link to a user ID
-	// TODO
-	let crudeUserIdGenerator = 0
-	const sessionKey = Symbol('session to user')
+	// link the session to a user ID
 	app.use(async (req: ExtendedRequest, res, next) => {
-		// TODO
-		const sessionId: string = req.session!.id
-		let session = await sessionCRUD.read(sessionId)
-		if (!session ) {
-			session = {
-				userId: `${++crudeUserIdGenerator}`
-			}
-			// TODO
-			console.log('created userId', session.userId)
-			await sessionCRUD.create(sessionId, session)
+		if (!req.session!.userId) {
+			// NOTE
+			// This is an exercise
+			// We are supposing the user is previously connected
+			// Thus we are always using the same user:
+			req.session!.userId = 1234
 		}
-		const { userId } = session
-		console.log({userId})
-		req.userId = userId!
+
+		req.userId = req.session!.userId
 
 		logger.info({
 			uuid: req.uuid,
-			sessionId,
-			userId,
+			sessionId: req.session!.id,
+			userId: req.userId,
 		})
+
+
 		next()
 	})
 
@@ -116,9 +110,9 @@ function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		limit: '1Mb', // for profile image
 	}))
 
-	app.use(routesFactory({
+	app.use(await routesFactory({
 		logger,
-		hCardCRUD: hCardCRUDFactory({ logger, dbConnexionSettings })
+		hCardCRUD: await hCardCRUDFactory({ logger, db: dbHCard })
 	}))
 
 	app.use((req, res) => {
