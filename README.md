@@ -19,10 +19,11 @@ References:
 ### prerequisites
 This app needs node >= 7
 
-This app needs a Redis and a Mongo database. Suggestion: use the default docker images.
+This app needs a Redis and a Mongo databases. Suggestion: use the default docker images.
 * https://hub.docker.com/r/library/mongo/
 * https://hub.docker.com/r/library/redis/
-Then provides their url in env vars `DB_URL_MONGO_01` and `DB_URL_REDIS_01` or through a `.env` file:
+
+Then provides their url in env vars `DB_URL_MONGO_01` and `DB_URL_REDIS_01` or through a `.env` file, example:
 ```bash
 touch .env
 echo 'DB_URL_MONGO_01="mongodb://localhost:32773"' >> .env
@@ -42,4 +43,4 @@ yarn start | ./node_modules/.bin/bunyan
 ```
 
 ## Contributing
-see [[CONTRIBUTING.md]]
+see CONTRIBUTING.md

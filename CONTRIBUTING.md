@@ -21,4 +21,4 @@ Written in typescript, with 2 configurations:
 
 
 ## Committing
-Before commiting: `yarn run build`
+Before committing: `yarn run build`
