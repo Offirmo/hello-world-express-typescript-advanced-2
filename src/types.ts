@@ -15,11 +15,10 @@ interface RequestWithUUID extends Express.Request {
 }
 
 interface RequestWithParsedBody extends Express.Request {
-	body: object // body parser TODO use JSON type
+	body: any // body parser TODO use JSON type
 }
 
 interface ExtendedRequest extends RequestWithUserId, RequestWithUUID, RequestWithParsedBody {
-	body: object // copy to resolve the conflict
 }
 
 export {

@@ -4,7 +4,6 @@ import { defaultHCard } from '../hcard'
 
 const defaultUser: User = {
 	hCard: defaultHCard,
-	pendingHCardUpdates: {}
 }
 
 

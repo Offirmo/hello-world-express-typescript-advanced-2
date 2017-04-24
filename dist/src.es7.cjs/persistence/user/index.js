@@ -33,7 +33,6 @@ async function factory(dependencies = {}) {
     async function update(userId, candidateData) {
         validateUserIdOrThrow(userId);
         hcard_1.validateKeysOrThrow(candidateData.hCard || {});
-        hcard_1.validateKeysOrThrow(candidateData.pendingHCardUpdates || {});
         let existingData = await read(userId);
         if (!existingData) {
             const err = new Error(`User not found`);
@@ -41,8 +40,6 @@ async function factory(dependencies = {}) {
             err.details = { userId };
             throw err;
         }
-        console.log('data so far', existingData);
-        console.log('data pending', lodash_1.defaultsDeep(candidateData, existingData));
         await userCollection.updateOne({ id: userId }, candidateData);
     }
     async function purge(userId) {
@@ -50,7 +47,7 @@ async function factory(dependencies = {}) {
         throw new Error('Not implemented!');
     }
     // XXX for the sake of the exercise,
-    // autocreate user 1234 if missing
+    // auto-create user 1234 if it doesn't exist
     if (!(await read('1234'))) {
         logger.info('Recreating the demo user...');
         create({

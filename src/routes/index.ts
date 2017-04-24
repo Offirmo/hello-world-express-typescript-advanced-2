@@ -4,7 +4,6 @@ import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-
 import { CRUD } from '../persistence/types'
 import { User } from '../models/user'
 import { factory as splashAppFactory } from '../apps/splash'
-import { factory as hcardLiveEditionAPIFactory } from '../apis/hcardLiveEdition'
 import { factory as hcardEditionAppFactory } from '../apps/hcardEdition'
 
 
@@ -23,16 +22,11 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	const router = express.Router()
 
-	router.use('/', await splashAppFactory({
+	router.use('/s', await splashAppFactory({
 		logger,
 	}))
 
-	router.use('/', await hcardLiveEditionAPIFactory({
-		logger,
-		userCRUD,
-	}))
-
-	router.use('/domain', await hcardEditionAppFactory({
+	router.use('/', await hcardEditionAppFactory({
 		logger,
 		userCRUD,
 	}))

@@ -3,13 +3,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const express = require("express");
 const loggers_types_and_stubs_1 = require("@offirmo/loggers-types-and-stubs");
+const hcard_1 = require("../../models/hcard");
 const globals_1 = require("../../globals");
 const server_rendered_index_1 = require("./server-rendered-index");
 const defaultDependencies = {
     logger: loggers_types_and_stubs_1.serverLoggerToConsole,
+    sharedSessionKeyPendingHCardEdits: 'hcardLiveEdition',
 };
 async function factory(dependencies = {}) {
-    const { logger, userCRUD } = Object.assign({}, defaultDependencies, dependencies);
+    const { logger, userCRUD, sharedSessionKeyPendingHCardEdits } = Object.assign({}, defaultDependencies, dependencies);
     logger.debug('Initializing the client1 webapp…');
     if (!userCRUD)
         throw new Error('hCard edition app: can’t work without a persistence layer!');
@@ -22,19 +24,46 @@ async function factory(dependencies = {}) {
     // https://expressjs.com/en/starter/static-files.html
     // REM: respond with index.html when a GET request is made to the homepage
     app.use(express.static(path.join(__dirname, 'public')));
-    async function handleAsync(req, res) {
-        let userData = await userCRUD.read(req.userId);
-        console.log('restoring...', userData, userData.hCard, userData.pendingHCardUpdates);
-        let editorHCardData = Object.assign({}, userData.hCard, userData.pendingHCardUpdates);
-        const preRenderedHtml = renderedHtmlAsString(editorHCardData);
-        //console.log('restoring...', editorHCardData, preRenderedHtml)
-        res.render('index', {
-            preRenderedHtml,
-            hCardData: editorHCardData,
-        });
-    }
     app.get('/', (req, res, next) => {
-        handleAsync(req, res)
+        (async function render() {
+            let userData = await userCRUD.read(req.userId);
+            const savedHCardData = userData.hCard;
+            const pendingHCardData = req.session[sharedSessionKeyPendingHCardEdits] || {};
+            let editorHCardData = Object.assign({}, savedHCardData, pendingHCardData);
+            const preRenderedHtml = renderedHtmlAsString(editorHCardData);
+            res.render('index', {
+                preRenderedHtml,
+                hCardData: editorHCardData,
+            });
+        })()
+            .catch(next);
+    });
+    app.post('/update', (req, res, next) => {
+        (async function updateHcard() {
+            const candidateData = req.body;
+            hcard_1.validateKeysOrThrow(candidateData);
+            // TODO remove unchanged fields
+            req.session[sharedSessionKeyPendingHCardEdits] =
+                Object.assign(req.session[sharedSessionKeyPendingHCardEdits] || {}, candidateData);
+        })()
+            .then(() => void res.end())
+            .catch(next);
+    });
+    app.post('/submit', (req, res, next) => {
+        userCRUD.update(req.userId, { hCard: req.body })
+            .then(() => {
+            req.session[sharedSessionKeyPendingHCardEdits] = {};
+            res.send(`
+<!DOCTYPE html>
+<head>
+	<title>Live hCard Preview, by Yves Jutard</title>
+	<link href="domain/css/bootstrap.min.css" rel="stylesheet" >
+	<link href="domain/css/main.css" rel="stylesheet">
+</head>
+Saved.<br />
+<a href="/domain">Go back to edition</a>
+	`);
+        })
             .catch(next);
     });
     return app;

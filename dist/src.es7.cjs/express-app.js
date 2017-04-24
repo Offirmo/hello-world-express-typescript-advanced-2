@@ -17,13 +17,12 @@ const defaultDependencies = {
 };
 async function factory(dependencies = {}) {
     const { logger, sessionSecret, isHttps, dbUsers, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies);
-    logger.info('Initializing the top express app…');
+    logger.debug('Initializing the top express app…');
     const RedisSessionStore = redisSession(session);
     if (!dbUsers)
         throw new Error('App: Need persistence db for users !');
     if (!dbSessionRedisUrl)
         logger.warn('XXX please provide a redis url for the session store !');
-    // TODO HTTPS
     if (!isHttps)
         logger.warn('XXX please activate HTTPS on this server !');
     if (sessionSecret === defaultDependencies.sessionSecret)
@@ -37,7 +36,6 @@ async function factory(dependencies = {}) {
         next();
     });
     // log the request as early as possible
-    //app.use(morgan('combined')) // TODO remove
     app.use((req, res, next) => {
         logger.info({
             uuid: req.uuid,
@@ -46,7 +44,6 @@ async function factory(dependencies = {}) {
         });
         next();
     });
-    // TODO log on exit also !
     // TODO activate CORS
     app.use(helmet());
     // https://github.com/expressjs/session

@@ -56,6 +56,7 @@ async function factory() {
 
 	const server = createServer(await expressAppFactory({
 		logger,
+		isHttps: config.isHttps,
 		sessionSecret: config.sessionSecret,
 		dbUsers: dbMongo01,
 		dbSessionRedisUrl: config.dbUrlRedis01,

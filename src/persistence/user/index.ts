@@ -54,7 +54,6 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}): Prom
 	async function update(userId: string, candidateData: Partial<User>): Promise<void> {
 		validateUserIdOrThrow(userId)
 		validateHCardKeysOrThrow(candidateData.hCard || {})
-		validateHCardKeysOrThrow(candidateData.pendingHCardUpdates || {})
 
 		let existingData = await read(userId)
 		if (!existingData) {
@@ -63,10 +62,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}): Prom
 			err.details = { userId }
 			throw err
 		}
-
-		console.log('data so far', existingData)
-		console.log('data pending', defaultsDeep(candidateData, existingData))
-
+		
 		await userCollection.updateOne({ id: userId }, candidateData)
 	}
 
@@ -78,7 +74,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}): Prom
 
 
 	// XXX for the sake of the exercise,
-	// autocreate user 1234 if missing
+	// auto-create user 1234 if it doesn't exist
 	if(!(await read('1234'))) {
 		logger.info('Recreating the demo user...')
 		create({

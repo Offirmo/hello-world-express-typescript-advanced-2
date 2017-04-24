@@ -29,7 +29,7 @@ const defaultDependencies: InjectableDependencies = {
 
 async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const { logger, sessionSecret, isHttps, dbUsers, dbSessionRedisUrl } = Object.assign({}, defaultDependencies, dependencies)
-	logger.info('Initializing the top express app…')
+	logger.debug('Initializing the top express app…')
 
 	const RedisSessionStore = redisSession(session)
 
@@ -39,7 +39,6 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	if (!dbSessionRedisUrl)
 		logger.warn('XXX please provide a redis url for the session store !')
 
-	// TODO HTTPS
 	if (!isHttps)
 		logger.warn('XXX please activate HTTPS on this server !')
 
@@ -58,7 +57,6 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	})
 
 	// log the request as early as possible
-	//app.use(morgan('combined')) // TODO remove
 	app.use((req: RequestWithUUID, res, next) => {
 		logger.info({
 			uuid: req.uuid,
@@ -67,7 +65,6 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		})
 		next()
 	})
-	// TODO log on exit also !
 
 	// TODO activate CORS
 	app.use(helmet())

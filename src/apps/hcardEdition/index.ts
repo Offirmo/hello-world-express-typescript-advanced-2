@@ -4,8 +4,8 @@ import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-
 
 import { CRUD } from '../../persistence/types'
 import { User } from '../../models/user'
-import { HCard } from '../../models/hcard'
-import { RequestWithUserId } from "../../types";
+import { HCard, validateKeysOrThrow } from '../../models/hcard'
+import { ExtendedRequest } from "../../types";
 
 import { consolidatedTemplates } from '../../globals'
 import { factory as renderedHtmlAsStringFactory } from './server-rendered-index'
@@ -13,15 +13,17 @@ import { factory as renderedHtmlAsStringFactory } from './server-rendered-index'
 
 interface InjectableDependencies {
 	logger: ServerLogger
+	sharedSessionKeyPendingHCardEdits: string
 	userCRUD?: CRUD<User>
 }
 
 const defaultDependencies: InjectableDependencies = {
 	logger: serverLoggerToConsole,
+	sharedSessionKeyPendingHCardEdits: 'hcardLiveEdition',
 }
 
 async function factory(dependencies: Partial<InjectableDependencies> = {}) {
-	const { logger, userCRUD } = Object.assign({}, defaultDependencies, dependencies)
+	const { logger, userCRUD, sharedSessionKeyPendingHCardEdits } = Object.assign({}, defaultDependencies, dependencies)
 	logger.debug('Initializing the client1 webapp…')
 
 	if(!userCRUD)
@@ -40,24 +42,51 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	// REM: respond with index.html when a GET request is made to the homepage
 	app.use(express.static(path.join(__dirname, 'public')))
 
-	async function handleAsync(req: RequestWithUserId, res: express.Response) {
-		let userData = await userCRUD!.read(req.userId)
+	app.get('/', (req: ExtendedRequest, res, next) => {
+		(async function render() {
+			let userData = await userCRUD!.read(req.userId)
+			const savedHCardData = userData!.hCard
+			const pendingHCardData: Partial<HCard> = req.session![sharedSessionKeyPendingHCardEdits] || {}
+			let editorHCardData: HCard = Object.assign({}, savedHCardData, pendingHCardData) as HCard
 
-		console.log('restoring...', userData, userData!.hCard, userData!.pendingHCardUpdates)
-		let editorHCardData: HCard = Object.assign({}, userData!.hCard, userData!.pendingHCardUpdates) as HCard
+			const preRenderedHtml = renderedHtmlAsString(editorHCardData)
 
-		const preRenderedHtml = renderedHtmlAsString(editorHCardData)
-		//console.log('restoring...', editorHCardData, preRenderedHtml)
-
-		res.render('index', {
-			preRenderedHtml,
-			hCardData: editorHCardData,
-		})
-	}
-
-	app.get('/', (req: RequestWithUserId, res, next) => {
-		handleAsync(req, res)
+			res.render('index', {
+				preRenderedHtml,
+				hCardData: editorHCardData,
+			})
+		})()
 			.catch(next)
+	})
+
+	app.post('/update', (req: ExtendedRequest, res, next) => {
+		(async function updateHcard() {
+			const candidateData: Partial<HCard> = req.body
+			validateKeysOrThrow(candidateData)
+			// TODO remove unchanged fields
+			req.session![sharedSessionKeyPendingHCardEdits] =
+				Object.assign(req.session![sharedSessionKeyPendingHCardEdits] || {}, candidateData)
+		})()
+		.then(() => void res.end())
+		.catch(next)
+	})
+
+	app.post('/submit', (req: ExtendedRequest, res, next) => {
+		userCRUD.update(req.userId, { hCard: req.body })
+		.then(() => {
+			req.session![sharedSessionKeyPendingHCardEdits] = {}
+			res.send(`
+<!DOCTYPE html>
+<head>
+	<title>Live hCard Preview, by Yves Jutard</title>
+	<link href="domain/css/bootstrap.min.css" rel="stylesheet" >
+	<link href="domain/css/main.css" rel="stylesheet">
+</head>
+Saved.<br />
+<a href="/domain">Go back to edition</a>
+	`)
+		})
+		.catch(next)
 	})
 
 	return app

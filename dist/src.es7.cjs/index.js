@@ -41,6 +41,7 @@ async function factory() {
     const dbMongo01 = await mongodb_1.MongoClient.connect(config.dbUrlMongo01);
     const server = http_1.createServer(await express_app_1.factory({
         logger,
+        isHttps: config.isHttps,
         sessionSecret: config.sessionSecret,
         dbUsers: dbMongo01,
         dbSessionRedisUrl: config.dbUrlRedis01,
