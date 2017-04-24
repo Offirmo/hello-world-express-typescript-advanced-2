@@ -10,7 +10,7 @@ import { Db as MongoDb } from 'mongodb'
 
 import { factory as userCRUDFactory } from './persistence/user'
 import { factory as routesFactory } from './routes'
-import { RequestWithUUID, ExtendedRequest } from "./types"
+import { ExtendedError, RequestWithUUID, ExtendedRequest } from "./types"
 
 
 interface InjectableDependencies {
@@ -122,9 +122,9 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		res.status(404).end()
 	})
 
-	const errorHandler: express.ErrorRequestHandler = (err, req, res, next) => {
-		logger.error(err.stack)
-		res.status(500).send(`Something broke ! ${err.message}`)
+	const errorHandler: express.ErrorRequestHandler = (err: ExtendedError, req, res, next) => {
+		logger.error(err)
+		res.status(err.httpStatusHint || 500).send(`Something broke! Our devs are already on it!`)
 	}
 	app.use(errorHandler)
 
