@@ -12,7 +12,7 @@ const defaultDependencies = {
 };
 async function factory(dependencies = {}) {
     const { logger, userCRUD, sharedSessionKeyPendingHCardEdits } = Object.assign({}, defaultDependencies, dependencies);
-    logger.debug('Initializing the client1 webapp…');
+    logger.debug('Initializing the hCard edition webapp…');
     if (!userCRUD)
         throw new Error('hCard edition app: can’t work without a persistence layer!');
     const renderedHtmlAsString = (await server_rendered_index_1.factory({ logger })).renderToString;

@@ -24,7 +24,7 @@ const defaultDependencies: InjectableDependencies = {
 
 async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	const { logger, userCRUD, sharedSessionKeyPendingHCardEdits } = Object.assign({}, defaultDependencies, dependencies)
-	logger.debug('Initializing the client1 webapp…')
+	logger.debug('Initializing the hCard edition webapp…')
 
 	if(!userCRUD)
 		throw new Error('hCard edition app: can’t work without a persistence layer!')

@@ -44,7 +44,7 @@ async function factory() {
 
 	const config = {
 		port: process.env.PORT || 5000,
-		isHttps: !!process.env.IS_HTTPS,
+		isHttps: (process.env.IS_HTTPS === 'true'),
 		sessionSecret: process.env.SESSION_SECRET,
 		dbUrlMongo01: process.env.DB_URL_MONGO_01,
 		dbUrlRedis01: process.env.DB_URL_REDIS_01,

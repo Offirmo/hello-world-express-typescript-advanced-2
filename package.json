@@ -16,13 +16,12 @@
     "copy-other-files": "cpx 'src/**/*.{dust,css,png}' dist/src.es7.cjs",
     "build": "npm-run-all clean --parallel transpile copy-other-files",
     "start": "node dist/src.es7.cjs/index.js",
-
     "__dev": "~~~~~~ DEVELOPMENT ~~~~~~",
     "dev1": "tsc -p meta/dev --watch",
     "dev2": "npm run copy-other-files -- --watch --verbose",
     "dev": "npm-run-all clean --parallel dev1 dev2",
     "start:dev": "nodemon --delay 1 --config meta/dev/nodemon.json dist/src.es7.cjs/index.js | ./node_modules/.bin/bunyan",
-
+    "test": "mocha --opts node_modules/@offirmo/unit-test-toolbox/mocha.opts node_modules/@offirmo/unit-test-toolbox/mocha-chai-init-node.js 'dist/src.es7.cjs/**/*spec.js'",
     "__misc": "~~~~~~ MISC ~~~~~~",
     "__local_tools": "~~~~~~ Tools installed locally ~~~~~~",
     "__shortcuts": "~~~~~~ Shortcuts ~~~~~~"
@@ -48,6 +47,7 @@
     "uuid": "^3.0.1"
   },
   "devDependencies": {
+    "@offirmo/unit-test-toolbox": "^1.0.0",
     "@types/body-parser": "^1.16.3",
     "@types/bunyan": "^0.0.36",
     "@types/connect-redis": "^0.0.5",
