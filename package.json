@@ -61,11 +61,13 @@
     "@types/morgan": "^1.7.32",
     "@types/node": "^7.0.13",
     "@types/react-dom": "^15.5.0",
+    "@types/supertest": "^2.0.0",
     "@types/uuid": "^2.0.29",
     "cpx": "^1.5.0",
     "nodemon": "^1.11.0",
     "npm-run-all": "^4.0.2",
     "pre-commit": "^1.2.2",
+    "supertest": "^3.0.0",
     "typescript": "^2.2.2"
   },
   "pre-commit": [
