@@ -4,7 +4,7 @@ import { ServerLogger } from '@offirmo/loggers-types-and-stubs'
 import { MongoClient } from 'mongodb'
 
 import { factory as expressAppFactory } from './express-app'
-import {ExtendedError} from "./types";
+import { ExtendedError } from "./types";
 
 
 async function factory() {

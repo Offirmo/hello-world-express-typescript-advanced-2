@@ -2,7 +2,7 @@ import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-
 import { Db as MongoDb } from 'mongodb'
 import { defaultsDeep } from 'lodash'
 
-import { ExtendedError } from './../../types'
+import { ExtendedError } from '../../types'
 import { User, defaultUser } from '../../models/user'
 import { validateKeysOrThrow as validateHCardKeysOrThrow } from '../../models/hcard'
 import { CRUD } from '../types'
