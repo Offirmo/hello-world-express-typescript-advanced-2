@@ -4,9 +4,14 @@ Advanced express.js app in typescript, deployable on heroku :rooster: :koala: :d
 
 ## Introduction
 
-Iterating on previous Hello World:
+Iterating on previous Hello Worlds:
 * https://github.com/Offirmo/hello-world-typescript
 * https://github.com/Offirmo/hello-world-heroku
+* https://github.com/Offirmo/hello-world-express-typescript
+
+See also those related/expanded Hello Worlds:
+* https://github.com/Offirmo/hello-world-sentry
+
 
 References:
 * https://github.com/Offirmo-team/wiki/wiki/express.js
