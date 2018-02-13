@@ -50,3 +50,7 @@ yarn start | ./node_modules/.bin/bunyan
 
 ## Contributing
 see CONTRIBUTING.md
+
+
+## TOSORT
+* https://blog.sourcerer.io/a-crash-course-on-typescript-with-node-js-2c376285afe1
