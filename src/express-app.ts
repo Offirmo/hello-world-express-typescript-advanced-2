@@ -10,7 +10,7 @@ import { Db as MongoDb } from 'mongodb'
 
 import { factory as userCRUDFactory } from './persistence/user'
 import { factory as routesFactory } from './routes'
-import { ExtendedError, RequestWithUUID, ExtendedRequest } from "./types"
+import { ExtendedError, RequestWithUUID, ExtendedRequest } from './types'
 
 
 interface InjectableDependencies {
@@ -53,13 +53,16 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	app.enable('trust proxy')
 	app.disable('x-powered-by')
 
-	app.use(function assignId(req: RequestWithUUID, res, next) {
+	app.use(function assignId(untyped_req, res, next) {
+		const req = untyped_req as RequestWithUUID
 		req.uuid = uuid.v4()
 		next()
 	})
 
 	// log the request as early as possible
-	app.use((req: RequestWithUUID, res, next) => {
+	app.use((untyped_req, res, next) => {
+		const req = untyped_req as RequestWithUUID
+
 		logger.info({
 			uuid: req.uuid,
 			method: (morgan as any)['method'](req),
@@ -85,7 +88,9 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	}))
 
 	// link the session to a user ID
-	app.use(async (req: ExtendedRequest, res, next) => {
+	app.use((untyped_req, res, next) => {
+		const req = untyped_req as ExtendedRequest
+
 		if (!req.session!.userId) {
 			// NOTE
 			// This is an exercise
@@ -101,7 +106,6 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			sessionId: req.session!.id,
 			userId: req.userId,
 		})
-
 
 		next()
 	})

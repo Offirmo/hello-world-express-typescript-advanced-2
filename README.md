@@ -16,13 +16,14 @@ See also those related/expanded Hello Worlds:
 References:
 * https://github.com/Offirmo-team/wiki/wiki/express.js
 * https://expressjs.com/en/4x/api.html
+* https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/express/express-tests.ts
 
 
 
 ## Installation and launch
 
 ### prerequisites
-This app needs node >= 7
+This app needs node >= 8
 
 This app needs a Redis and a Mongo databases. Suggestion: use the default docker images.
 * https://hub.docker.com/r/library/mongo/

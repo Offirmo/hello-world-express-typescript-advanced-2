@@ -16,7 +16,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 
 	const app = express.Router()
 
-	app.get('/', (req, res) => {
+	app.get('/', (req, res): void => {
 		res.send('This is not what you are looking for. Maybe you should check the instructions ?')
 	})
 

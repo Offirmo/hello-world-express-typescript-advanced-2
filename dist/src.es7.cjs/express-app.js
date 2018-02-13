@@ -33,12 +33,14 @@ async function factory(dependencies = {}) {
     // https://expressjs.com/en/4x/api.html#app.settings.table
     app.enable('trust proxy');
     app.disable('x-powered-by');
-    app.use(function assignId(req, res, next) {
+    app.use(function assignId(untyped_req, res, next) {
+        const req = untyped_req;
         req.uuid = uuid.v4();
         next();
     });
     // log the request as early as possible
-    app.use((req, res, next) => {
+    app.use((untyped_req, res, next) => {
+        const req = untyped_req;
         logger.info({
             uuid: req.uuid,
             method: morgan['method'](req),
@@ -61,7 +63,8 @@ async function factory(dependencies = {}) {
         }
     }));
     // link the session to a user ID
-    app.use(async (req, res, next) => {
+    app.use((untyped_req, res, next) => {
+        const req = untyped_req;
         if (!req.session.userId) {
             // NOTE
             // This is an exercise

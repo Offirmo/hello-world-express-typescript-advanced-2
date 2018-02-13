@@ -24,7 +24,8 @@ async function factory(dependencies = {}) {
     // https://expressjs.com/en/starter/static-files.html
     // REM: respond with index.html when a GET request is made to the homepage
     app.use(express.static(path.join(__dirname, 'public')));
-    app.get('/', (req, res, next) => {
+    app.get('/', (untyped_req, res, next) => {
+        const req = untyped_req;
         (async function render() {
             let userData = await userCRUD.read(req.userId);
             const savedHCardData = userData.hCard;
@@ -49,7 +50,8 @@ async function factory(dependencies = {}) {
             .then(() => void res.end())
             .catch(next);
     });
-    app.post('/submit', (req, res, next) => {
+    app.post('/submit', (untyped_req, res, next) => {
+        const req = untyped_req;
         userCRUD.update(req.userId, { hCard: req.body })
             .then(() => {
             req.session[sharedSessionKeyPendingHCardEdits] = {};

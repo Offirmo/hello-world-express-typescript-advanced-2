@@ -5,7 +5,7 @@ import { ServerLogger, serverLoggerToConsole } from '@offirmo/loggers-types-and-
 import { CRUD } from '../../persistence/types'
 import { User } from '../../models/user'
 import { HCard, validateKeysOrThrow } from '../../models/hcard'
-import { ExtendedRequest } from "../../types";
+import { ExtendedRequest } from '../../types'
 
 import { consolidatedTemplates } from '../../globals'
 import { factory as renderedHtmlAsStringFactory } from './server-rendered-index'
@@ -42,7 +42,9 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 	// REM: respond with index.html when a GET request is made to the homepage
 	app.use(express.static(path.join(__dirname, 'public')))
 
-	app.get('/', (req: ExtendedRequest, res, next) => {
+	app.get('/', (untyped_req, res, next): void => {
+		const req: ExtendedRequest = untyped_req as ExtendedRequest
+
 		(async function render() {
 			let userData = await userCRUD!.read(req.userId)
 			const savedHCardData = userData!.hCard
@@ -59,7 +61,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 			.catch(next)
 	})
 
-	app.post('/update', (req: ExtendedRequest, res, next) => {
+	app.post('/update', (req, res, next): void => {
 		(async function updateHcard() {
 			const candidateData: Partial<HCard> = req.body
 			validateKeysOrThrow(candidateData)
@@ -71,7 +73,9 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}) {
 		.catch(next)
 	})
 
-	app.post('/submit', (req: ExtendedRequest, res, next) => {
+	app.post('/submit', (untyped_req, res, next): void => {
+		const req: ExtendedRequest = untyped_req as ExtendedRequest
+
 		userCRUD.update(req.userId, { hCard: req.body })
 		.then(() => {
 			req.session![sharedSessionKeyPendingHCardEdits] = {}
