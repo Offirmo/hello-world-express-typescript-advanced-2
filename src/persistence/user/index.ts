@@ -47,7 +47,7 @@ async function factory(dependencies: Partial<InjectableDependencies> = {}): Prom
 
 	async function read(userId: string): Promise<User | undefined> {
 		validateUserIdOrThrow(userId)
-		return await userCollection.findOne({ id: userId })
+		return (await userCollection.findOne({ id: userId })) ?? undefined
 	}
 
 

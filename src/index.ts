@@ -1,7 +1,7 @@
 import { createServer } from 'http'
 import { createLogger } from 'bunyan'
 import { ServerLogger } from '@offirmo/loggers-types-and-stubs'
-import { MongoClient } from 'mongodb'
+import { MongoClient, Db as MongoDb } from 'mongodb'
 
 import { factory as expressAppFactory } from './express-app'
 
@@ -57,8 +57,21 @@ async function factory() {
 		throw new Error('Missing or invalid configuration (env var): DB_URL_REDIS_01')
 	}
 
-	const dbMongo01 = await MongoClient.connect(config.dbUrlMongo01)
+	const dbMongo01: MongoDb = await new Promise<MongoDb>((resolve, reject) => {
+		MongoClient.connect(config.dbUrlMongo01!, function(err, client) {
+			if (err) {
+				reject(err)
+				return
+			}
 
+			console.log("Connected successfully to server")
+		   
+			const dbName = 'TODO'
+			resolve(client.db(dbName))
+		  })
+	})
+
+	
 
 	const server = createServer(await expressAppFactory({
 		logger,
@@ -68,16 +81,14 @@ async function factory() {
 		dbSessionRedisUrl: config.dbUrlRedis01,
 	}))
 
-	server.listen(config.port, (err: Error) => {
-		if (err) {
-			console.error(`Server error!`, err)
-			logger.fatal(err, `Server error!`)
-			return
-		}
-
+	server.on('error', (err: Error) => {
+		console.error('something bad happened', err)
+		logger.fatal(err, `Server error!`)
+	})
+	
+	server.listen(config.port, () => {
 		logger.info(`Server launched, listening on :${config.port}`)
 	})
-
 }
 
 factory()

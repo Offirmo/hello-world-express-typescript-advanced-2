@@ -1,4 +1,4 @@
-# hello-world-express-advanced
+# hello-world-express-advanced II (with Mongo/Redis)
 Advanced express.js app in typescript, deployable on heroku :rooster: :koala: :dragon: :construction_worker:
 
 
@@ -8,6 +8,7 @@ Iterating on previous Hello Worlds:
 * https://github.com/Offirmo/hello-world-typescript
 * https://github.com/Offirmo/hello-world-heroku
 * https://github.com/Offirmo/hello-world-express-typescript
+* https://github.com/Offirmo/hello-world-express-typescript-advanced-1
 
 See also those related/expanded Hello Worlds:
 * https://github.com/Offirmo/hello-world-sentry
@@ -23,8 +24,6 @@ References:
 ## Installation and launch
 
 ### prerequisites
-This app needs node >= 8
-
 This app needs a Redis and a Mongo databases. Suggestion: use the default docker images.
 * https://hub.docker.com/r/library/mongo/
 * https://hub.docker.com/r/library/redis/
